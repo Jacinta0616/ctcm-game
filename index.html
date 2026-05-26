@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>環保小遊戲 | 中台禪寺女眾環保組</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 背景裝飾 -->
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:4%;font-size:1.8rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:18%;right:6%;font-size:2.2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="top:55%;left:2%;font-size:1.4rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:28%;right:4%;font-size:2rem;animation-delay:2s">🍀</span>
+    <span class="leaf" style="bottom:12%;left:8%;font-size:1.6rem;animation-delay:4s">🌿</span>
+    <span class="leaf" style="top:72%;right:10%;font-size:1.3rem;animation-delay:0.8s">🍃</span>
+  </div>
+
+  <div class="container">
+
+    <!-- 標題區 -->
+    <header class="header">
+      <div class="mascot" aria-hidden="true">
+        <span class="mascot-emoji">🌱</span>
+        <span class="mascot-emoji mascot-right">♻️</span>
+      </div>
+      <h1 class="title">環保小遊戲</h1>
+      <p class="subtitle">中台禪寺女眾環保組</p>
+    </header>
+
+    <!-- 遊戲選擇 -->
+    <main>
+      <h2 class="section-title">選擇你想玩的遊戲</h2>
+      <div class="games-grid">
+
+        <!-- 遊戲 1：答題 -->
+        <a href="games/quiz/index.html" class="game-card card-quiz">
+          <div class="card-icon">💡</div>
+          <div class="card-body">
+            <h3>答題小遊戲</h3>
+            <p>垃圾分類、架房清潔<br>你知道多少？</p>
+          </div>
+          <span class="btn-play">開始遊戲 →</span>
+        </a>
+
+        <!-- 遊戲 2：垃圾分類 -->
+        <a href="games/sorting/index.html" class="game-card card-sort">
+          <div class="card-icon">♻️</div>
+          <div class="card-body">
+            <h3>垃圾大分類</h3>
+            <p>把垃圾丟進正確的桶子<br>越快越高分！</p>
+          </div>
+          <span class="btn-play">開始遊戲 →</span>
+        </a>
+
+        <!-- 遊戲 3：清潔步驟 -->
+        <a href="games/steps/index.html" class="game-card card-steps">
+          <div class="card-icon">🧹</div>
+          <div class="card-body">
+            <h3>清潔步驟排序</h3>
+            <p>把架房清潔的步驟<br>排出正確順序！</p>
+          </div>
+          <span class="btn-play">開始遊戲 →</span>
+        </a>
+
+        <!-- 遊戲 4：適才適所 -->
+        <a href="games/assign/index.html" class="game-card card-assign">
+          <div class="card-icon">🤝</div>
+          <div class="card-body">
+            <h3>適才適所</h3>
+            <p>依體力分配清潔任務<br>找到最適合的分工！</p>
+          </div>
+          <span class="btn-play">開始遊戲 →</span>
+        </a>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- 後台入口（低調放在角落） -->
+  <a href="admin/index.html" class="btn-admin">⚙️ 後台管理</a>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

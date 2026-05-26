@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>垃圾大分類 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 進度條 ── */
+    .progress-wrap {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .progress-label {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.5rem;
+    }
+    .progress-track {
+      background: var(--green-light);
+      border-radius: 999px;
+      height: 16px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, var(--green-mid), var(--green-dark));
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.45s ease;
+    }
+
+    /* ── 題目卡片 ── */
+    .item-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      border: 3px solid var(--green-light);
+      padding: 2rem 1.5rem 1.8rem;
+      text-align: center;
+      margin: 1.2rem auto;
+      max-width: 340px;
+    }
+    .item-emoji {
+      font-size: 6rem;
+      display: block;
+      line-height: 1.15;
+      animation: iconWiggle 2.5s ease-in-out infinite;
+    }
+    .item-name {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-top: 0.4rem;
+      display: block;
+    }
+
+    /* ── 回饋訊息 ── */
+    .feedback-bar {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 0.7rem 1rem;
+      border-radius: var(--radius-md);
+      min-height: 3.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.2rem;
+      line-height: 1.5;
+      transition: opacity 0.2s;
+    }
+    .fb-empty   { visibility: hidden; }
+    .fb-correct { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; animation: popIn 0.35s ease; }
+    .fb-wrong   { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; animation: shake 0.45s ease; }
+
+    /* ── 回收桶格 ── */
+    .bins-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+    }
+    .bin {
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 3px solid #e0e0e0;
+      padding: 1.1rem 0.4rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+                  box-shadow 0.2s,
+                  border-color 0.2s,
+                  background 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .bin:hover:not(:disabled) {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow: var(--shadow-md);
+    }
+    .bin:active:not(:disabled) { transform: scale(0.94); }
+    .bin-icon { font-size: 2.6rem; display: block; }
+    .bin-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    /* 各桶子 hover 主題色 */
+    .bin[data-bin="一般垃圾"]:hover:not(:disabled) { border-color: #78909c; background: #f5f5f5; }
+    .bin[data-bin="紙類"]:hover:not(:disabled)     { border-color: #795548; background: #efebe9; }
+    .bin[data-bin="塑膠"]:hover:not(:disabled)     { border-color: #1e88e5; background: #e3f2fd; }
+    .bin[data-bin="金屬"]:hover:not(:disabled)     { border-color: #546e7a; background: #eceff1; }
+    .bin[data-bin="玻璃"]:hover:not(:disabled)     { border-color: #00897b; background: #e0f2f1; }
+    .bin[data-bin="廚餘"]:hover:not(:disabled)     { border-color: #e64a19; background: #fbe9e7; }
+
+    /* 答對 / 答錯 狀態 */
+    .bin.correct {
+      background: #e8f5e9 !important;
+      border-color: #43a047 !important;
+      transform: scale(1.1) !important;
+    }
+    .bin.wrong {
+      background: #ffebee !important;
+      border-color: #e53935 !important;
+      animation: shake 0.45s ease;
+    }
+
+    /* ── 開始畫面 ── */
+    .start-wrap {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .start-mascot {
+      font-size: 7rem;
+      display: block;
+      animation: mascotBounce 2s ease-in-out infinite;
+      margin-bottom: 1.2rem;
+    }
+    .start-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 0.8rem;
+    }
+    .start-desc {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      line-height: 1.9;
+      margin-bottom: 2rem;
+    }
+
+    /* ── 結果畫面 ── */
+    .result-stars {
+      font-size: 2.2rem;
+      letter-spacing: 0.15em;
+      margin: 0.8rem 0;
+      animation: popIn 0.6s ease;
+    }
+    .result-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+    }
+
+    /* ── 工具 ── */
+    .hidden { display: none !important; }
+
+    /* ── 橫式雙欄 ── */
+    .sort-layout { display: flex; flex-direction: column; }
+
+    @media (orientation: landscape) {
+      .sort-layout {
+        flex-direction: row;
+        gap: 2rem;
+        align-items: center;
+      }
+      .sort-left  { flex: 0 0 260px; }
+      .sort-right { flex: 1; }
+      .item-card  { max-width: none; margin: 0 0 0.8rem; }
+      .feedback-bar { margin-bottom: 0; }
+      .start-wrap   { padding: 1.5rem 1rem; }
+      .start-mascot { font-size: 4.5rem; margin-bottom: 0.8rem; }
+      .start-title  { font-size: 1.8rem; }
+      .result-screen { padding: 1.5rem 1rem; }
+    }
+
+    /* ── RWD ── */
+    @media (max-width: 520px) {
+      .bins-grid        { grid-template-columns: repeat(2, 1fr); }
+      .item-emoji       { font-size: 5rem; }
+      .item-name        { font-size: 1.6rem; }
+      .bin-icon         { font-size: 2.1rem; }
+      .feedback-bar     { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- 頂部導覽 -->
+    <nav class="game-nav">
+      <a href="../../index.html" class="btn-back">← 回首頁</a>
+      <span class="game-title-bar">♻️ 垃圾大分類</span>
+      <div class="score-board">🏆 <span id="score">0</span> 分</div>
+    </nav>
+
+    <!-- ① 開始畫面 -->
+    <div id="screen-start" class="screen">
+      <div class="start-wrap">
+        <span class="start-mascot">♻️</span>
+        <h2 class="start-title">垃圾大分類</h2>
+        <p class="start-desc">
+          看到垃圾，點進正確的回收桶！<br>
+          共 <strong>10 題</strong>，每題 <strong>10 分</strong><br>
+          答對還會告訴你原因哦 😊
+        </p>
+        <button class="btn-restart" onclick="startGame()">開始遊戲！</button>
+      </div>
+    </div>
+
+    <!-- ② 遊戲畫面 -->
+    <div id="screen-game" class="screen hidden">
+
+      <!-- 進度條（橫跨兩欄上方） -->
+      <div class="progress-wrap">
+        <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 10 題</div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="sort-layout">
+        <!-- 左欄：題目卡片 + 回饋 -->
+        <div class="sort-left">
+          <div id="item-card" class="item-card">
+            <span id="item-emoji" class="item-emoji">♻️</span>
+            <span id="item-name" class="item-name">物品名稱</span>
+          </div>
+          <div id="feedback" class="feedback-bar fb-empty">　</div>
+        </div>
+
+        <!-- 右欄：回收桶 -->
+        <div class="sort-right">
+          <div class="bins-grid">
+            <button class="bin" data-bin="一般垃圾" onclick="selectBin('一般垃圾')">
+              <span class="bin-icon">🗑️</span>
+              <span class="bin-name">一般垃圾</span>
+            </button>
+            <button class="bin" data-bin="紙類" onclick="selectBin('紙類')">
+              <span class="bin-icon">📰</span>
+              <span class="bin-name">紙　　類</span>
+            </button>
+            <button class="bin" data-bin="塑膠" onclick="selectBin('塑膠')">
+              <span class="bin-icon">🧴</span>
+              <span class="bin-name">塑　　膠</span>
+            </button>
+            <button class="bin" data-bin="金屬" onclick="selectBin('金屬')">
+              <span class="bin-icon">🥫</span>
+              <span class="bin-name">金　　屬</span>
+            </button>
+            <button class="bin" data-bin="玻璃" onclick="selectBin('玻璃')">
+              <span class="bin-icon">🍾</span>
+              <span class="bin-name">玻　　璃</span>
+            </button>
+            <button class="bin" data-bin="廚餘" onclick="selectBin('廚餘')">
+              <span class="bin-icon">🥕</span>
+              <span class="bin-name">廚　　餘</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ③ 結果畫面 -->
+    <div id="screen-result" class="screen hidden">
+      <div class="result-screen">
+        <span id="result-emoji" class="result-emoji">🏆</span>
+        <p id="result-score" class="result-score">100 分</p>
+        <div id="result-stars" class="result-stars"></div>
+        <p id="result-msg" class="result-message">太厲害了！</p>
+        <div class="result-actions">
+          <button class="btn-restart" onclick="startGame()">再玩一次 ↺</button>
+          <a href="../../index.html" class="btn-back">← 回首頁</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  /* ==========================================
+     垃圾分類遊戲邏輯
+  ========================================== */
+
+  /* ── 題庫（18 題，每局隨機抽 10 題）── */
+  const ITEMS = [
+    { name: '報紙',   emoji: '📰', bin: '紙類',    hint: '乾淨的報紙、雜誌都可以回收' },
+    { name: '寶特瓶', emoji: '🧴', bin: '塑膠',    hint: '壓扁瓶身後投入塑膠回收' },
+    { name: '鋁罐',   emoji: '🥤', bin: '金屬',    hint: '鋁罐清洗後投入金屬回收' },
+    { name: '香蕉皮', emoji: '🍌', bin: '廚餘',    hint: '水果皮、果核都屬廚餘' },
+    { name: '塑膠袋', emoji: '🛍️', bin: '塑膠',    hint: '洗乾淨的塑膠袋可以回收' },
+    { name: '紙箱',   emoji: '📦', bin: '紙類',    hint: '紙箱壓扁後投入紙類回收' },
+    { name: '鐵罐',   emoji: '🥫', bin: '金屬',    hint: '鐵罐清洗後投入金屬回收' },
+    { name: '蘋果核', emoji: '🍎', bin: '廚餘',    hint: '果核、果皮都是廚餘' },
+    { name: '衛生紙', emoji: '🧻', bin: '一般垃圾', hint: '用過的衛生紙屬一般垃圾' },
+    { name: '玻璃瓶', emoji: '🍾', bin: '玻璃',    hint: '玻璃瓶請小心輕放投入' },
+    { name: '廢紙',   emoji: '📄', bin: '紙類',    hint: '乾淨的廢紙、作業紙可回收' },
+    { name: '便當盒', emoji: '🥡', bin: '塑膠',    hint: '清洗乾淨的塑膠便當盒可回收' },
+    { name: '口罩',   emoji: '😷', bin: '一般垃圾', hint: '用過的口罩屬一般垃圾' },
+    { name: '菜渣',   emoji: '🥬', bin: '廚餘',    hint: '蔬菜殘渣、葉子都是廚餘' },
+    { name: '玻璃杯', emoji: '🥛', bin: '玻璃',    hint: '玻璃杯屬玻璃類回收' },
+    { name: '書本',   emoji: '📚', bin: '紙類',    hint: '舊書、雜誌都可以回收' },
+    { name: '鋁箔包', emoji: '🧃', bin: '一般垃圾', hint: '複合材質不易分解，屬一般垃圾' },
+    { name: '免洗筷', emoji: '🥢', bin: '一般垃圾', hint: '用過的免洗筷屬一般垃圾' },
+  ];
+
+  /* ── 遊戲狀態 ── */
+  const state = {
+    items:   [],
+    current: 0,
+    score:   0,
+    total:   10,
+    lock:    false,
+  };
+
+  /* ── 工具 ── */
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen-' + id).classList.remove('hidden');
+  }
+
+  /* ── 開始遊戲 ── */
+  /* ── 從 localStorage 讀後台資料，沒有就用預設題庫 ── */
+  function getActiveItems() {
+    try {
+      const raw = localStorage.getItem('ctcm_sorting_custom');
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return ITEMS;
+  }
+
+  function startGame() {
+    state.items   = shuffle(getActiveItems()).slice(0, state.total);
+    state.current = 0;
+    state.score   = 0;
+    state.lock    = false;
+    updateScore();
+    showScreen('game');
+    renderItem();
+  }
+
+  /* ── 渲染目前題目 ── */
+  function renderItem() {
+    const item = state.items[state.current];
+
+    document.getElementById('item-emoji').textContent = item.emoji;
+    document.getElementById('item-name').textContent  = item.name;
+    document.getElementById('q-cur').textContent      = state.current + 1;
+    document.getElementById('progress-fill').style.width =
+      ((state.current / state.total) * 100) + '%';
+
+    // 重設所有桶子
+    document.querySelectorAll('.bin').forEach(b => {
+      b.classList.remove('correct', 'wrong');
+      b.disabled = false;
+    });
+
+    // 清除回饋
+    const fb = document.getElementById('feedback');
+    fb.className = 'feedback-bar fb-empty';
+    fb.textContent = '　';
+
+    // 進場動畫
+    const card = document.getElementById('item-card');
+    card.classList.remove('anim-pop');
+    void card.offsetWidth; // 強制 reflow
+    card.classList.add('anim-pop');
+  }
+
+  /* ── 選擇回收桶 ── */
+  function selectBin(binId) {
+    if (state.lock) return;
+    state.lock = true;
+
+    const item      = state.items[state.current];
+    const isCorrect = binId === item.bin;
+
+    // 鎖定所有桶子 + 高亮
+    document.querySelectorAll('.bin').forEach(b => {
+      b.disabled = true;
+      if (b.dataset.bin === item.bin)           b.classList.add('correct');
+      if (b.dataset.bin === binId && !isCorrect) b.classList.add('wrong');
+    });
+
+    // 加分
+    if (isCorrect) {
+      state.score += 10;
+      updateScore();
+    }
+
+    // 回饋訊息
+    const fb = document.getElementById('feedback');
+    if (isCorrect) {
+      fb.textContent = '✓ 答對了！' + item.hint;
+      fb.className   = 'feedback-bar fb-correct';
+    } else {
+      fb.textContent = '✗ 應該放「' + item.bin + '」～' + item.hint;
+      fb.className   = 'feedback-bar fb-wrong';
+    }
+
+    // 1.8 秒後進下一題
+    setTimeout(() => {
+      state.current++;
+      state.lock = false;
+      if (state.current >= state.total) {
+        showResult();
+      } else {
+        renderItem();
+      }
+    }, 1800);
+  }
+
+  /* ── 更新分數顯示 ── */
+  function updateScore() {
+    document.getElementById('score').textContent = state.score;
+  }
+
+  /* ── 顯示結果 ── */
+  function showResult() {
+    const pct = state.score / (state.total * 10);
+    let emoji, msg, stars;
+
+    if      (pct >= 1.0) { emoji = '🏆'; msg = '滿分達人！太厲害了！';         stars = '⭐⭐⭐⭐⭐'; }
+    else if (pct >= 0.8) { emoji = '🌟'; msg = '非常優秀！再接再厲！';         stars = '⭐⭐⭐⭐'; }
+    else if (pct >= 0.6) { emoji = '👍'; msg = '做得不錯！繼續加把勁！';       stars = '⭐⭐⭐'; }
+    else if (pct >= 0.4) { emoji = '💪'; msg = '還有進步空間，你可以的！';     stars = '⭐⭐'; }
+    else                  { emoji = '📚'; msg = '多練習幾次，下次一定更好！';   stars = '⭐'; }
+
+    document.getElementById('result-emoji').textContent = emoji;
+    document.getElementById('result-score').textContent = state.score + ' 分';
+    document.getElementById('result-stars').textContent = stars;
+    document.getElementById('result-msg').textContent   = msg;
+
+    document.getElementById('progress-fill').style.width = '100%';
+    showScreen('result');
+  }
+  </script>
+
+</body>
+</html>

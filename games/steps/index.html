@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>清潔步驟排序 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 模式選擇 ── */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+      margin: 2rem 0;
+    }
+    .mode-card {
+      background: white;
+      border: 3px solid #e0e0e0;
+      border-radius: var(--radius-xl);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .mode-card:hover, .mode-card:focus {
+      border-color: var(--green-mid);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+    .mode-card .mode-icon {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 0.7rem;
+      animation: mascotBounce 2s ease-in-out infinite;
+    }
+    .mode-card h3 {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 0.4rem;
+    }
+    .mode-card p {
+      font-size: 0.9rem;
+      color: var(--text-light);
+      line-height: 1.5;
+    }
+    .mode-card.mode-small { border-color: #a5d6a7; }
+    .mode-card.mode-big   { border-color: #90caf9; }
+    .mode-card.mode-small:hover { border-color: var(--green-mid); background: var(--green-bg); }
+    .mode-card.mode-big:hover   { border-color: #1e88e5; background: #e3f2fd; }
+
+    /* ── 遊戲區進度條 ── */
+    .progress-wrap  { margin-bottom: 1.2rem; text-align: center; }
+    .progress-label { font-size: 1rem; font-weight: 600; color: var(--text-light); margin-bottom: 0.4rem; }
+    .progress-track { background: var(--green-light); border-radius: 999px; height: 14px; overflow: hidden; }
+    .progress-fill  { background: linear-gradient(90deg, #66bb6a, #2e7d32); height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+
+    /* ── 指示說明 ── */
+    .hint-bar {
+      background: #fff9c4;
+      border: 2px solid #fbc02d;
+      border-radius: var(--radius-md);
+      padding: 0.7rem 1.2rem;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f57f17;
+      margin-bottom: 1.2rem;
+    }
+
+    /* ── 步驟卡片格 ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 500px) {
+      .steps-grid { grid-template-columns: 1fr; }
+      .mode-grid  { grid-template-columns: 1fr; }
+    }
+
+    .step-card {
+      background: white;
+      border: 3px solid #e0e0e0;
+      border-radius: var(--radius-lg);
+      padding: 1.1rem 1rem 1rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.22s ease;
+      box-shadow: var(--shadow-sm);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .step-card:hover {
+      border-color: var(--green-mid);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .step-card.selected {
+      border-color: #fbc02d;
+      background: #fffde7;
+    }
+    .step-card.correct {
+      border-color: #4caf50;
+      background: #e8f5e9;
+      cursor: default;
+    }
+    .step-card.wrong {
+      border-color: #f44336;
+      background: #ffebee;
+      cursor: default;
+      animation: shake 0.4s ease;
+    }
+    .step-card.disabled {
+      cursor: default;
+    }
+
+    /* 編號徽章 */
+    .order-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #fbc02d, #f57f17);
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 900;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(245,127,23,0.5);
+      animation: popIn 0.25s ease;
+    }
+    .step-card.correct .order-badge {
+      background: linear-gradient(135deg, #66bb6a, #2e7d32);
+    }
+    .step-card.wrong .order-badge {
+      background: linear-gradient(135deg, #ef5350, #c62828);
+    }
+
+    /* 正確答案顯示 */
+    .correct-badge {
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      width: 32px;
+      height: 32px;
+      background: #4caf50;
+      color: white;
+      font-size: 0.85rem;
+      font-weight: 900;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 卡片內容 */
+    .step-icon {
+      font-size: 2.4rem;
+      display: block;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+    .step-title {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      text-align: center;
+      margin-bottom: 0.35rem;
+    }
+    .step-desc {
+      font-size: 0.82rem;
+      color: var(--text-light);
+      text-align: center;
+      line-height: 1.5;
+    }
+    .step-tools {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      margin-top: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--green-mid);
+      font-weight: 600;
+    }
+    .step-tools::before {
+      content: '🔧';
+      font-size: 0.85rem;
+    }
+
+    /* ── 按鈕區 ── */
+    .action-row {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, #fbc02d, #f57f17);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.22s ease;
+      letter-spacing: 0.05em;
+    }
+    .btn-submit:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-reset {
+      background: white;
+      color: var(--text-light);
+      border: 2px solid #e0e0e0;
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .btn-reset:hover { border-color: var(--green-mid); color: var(--green-dark); }
+
+    /* ── 結果畫面 ── */
+    .result-header {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+    .result-score-big {
+      font-size: 4rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      line-height: 1;
+      margin: 0.5rem 0;
+    }
+    .result-stars {
+      font-size: 2.8rem;
+      letter-spacing: 0.1rem;
+      margin-bottom: 0.5rem;
+    }
+    .result-msg {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+    }
+
+    /* 結果步驟列表 */
+    .result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1.1rem;
+      box-shadow: var(--shadow-sm);
+      border-left: 5px solid #e0e0e0;
+    }
+    .result-item.ok  { border-left-color: #4caf50; }
+    .result-item.bad { border-left-color: #f44336; }
+    .result-step-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .result-item.ok  .result-step-num { background: #e8f5e9; color: #2e7d32; }
+    .result-item.bad .result-step-num { background: #ffebee; color: #c62828; }
+    .result-step-info { flex: 1; }
+    .result-step-title { font-weight: 700; font-size: 1rem; }
+    .result-step-note  { font-size: 0.82rem; color: var(--text-light); margin-top: 0.15rem; }
+    .result-check { font-size: 1.4rem; }
+
+    /* 頁面隱藏 */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── 橫式滿版 ── */
+    @media (orientation: landscape) {
+      .steps-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .step-card {
+        padding: 0.8rem 0.7rem 0.7rem;
+      }
+      .step-icon  { font-size: 1.8rem; }
+      .step-title { font-size: 0.95rem; }
+      .step-desc  { font-size: 0.72rem; }
+      .step-tools { font-size: 0.7rem; margin-top: 0.3rem; }
+      .mode-grid  {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 600px;
+        margin: 0.8rem auto;
+      }
+      .mode-card  { padding: 1.2rem 1rem; }
+      .mode-card .mode-icon { font-size: 2.8rem; }
+      .result-list { max-height: 50vh; overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-deco">
+    <span class="leaf" style="font-size:2.2rem;top:8%;left:6%;animation-delay:0s">🌿</span>
+    <span class="leaf" style="font-size:1.8rem;top:22%;right:9%;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="font-size:2.5rem;top:55%;left:3%;animation-delay:3s">🌱</span>
+    <span class="leaf" style="font-size:1.5rem;top:75%;right:5%;animation-delay:2s">🍀</span>
+  </div>
+
+  <div class="container">
+    <nav class="game-nav">
+      <a href="../../index.html" class="btn-back">← 回首頁</a>
+      <span class="game-title-bar">🧹 清潔步驟排序</span>
+    </nav>
+
+    <!-- ══ 選擇模式畫面 ══ -->
+    <div id="screen-mode" class="screen active">
+      <div class="header">
+        <div class="mascot">
+          <span style="font-size:3.5rem;animation:mascotBounce 2s ease-in-out infinite">🧹</span>
+          <span style="font-size:3.5rem;animation:mascotBounce 2s ease-in-out infinite;animation-delay:0.3s">✨</span>
+        </div>
+        <h1 class="game-main-title">清潔步驟排序</h1>
+        <p class="game-subtitle">把架房清潔步驟排成正確順序！</p>
+      </div>
+
+      <div class="hint-bar" style="margin-bottom:1.5rem">
+        📌 選擇今天要挑戰的關卡
+      </div>
+
+      <div class="mode-grid">
+        <div class="mode-card mode-small" tabindex="0" onclick="startGame('small')" onkeydown="if(event.key==='Enter')startGame('small')">
+          <span class="mode-icon">🚿</span>
+          <h3>架房小洗</h3>
+          <p>9 個步驟<br>日常清潔流程</p>
+        </div>
+        <div class="mode-card mode-big" tabindex="0" onclick="startGame('big')" onkeydown="if(event.key==='Enter')startGame('big')">
+          <span class="mode-icon">🪣</span>
+          <h3>架房大洗</h3>
+          <p>11 個步驟<br>深度清潔流程</p>
+        </div>
+      </div>
+
+      <p style="text-align:center;color:var(--text-light);font-size:0.9rem;margin-top:1rem">
+        💡 點選步驟卡片，依序排出正確順序
+      </p>
+    </div>
+
+    <!-- ══ 遊戲畫面 ══ -->
+    <div id="screen-game" class="screen">
+      <div class="progress-wrap">
+        <div class="progress-label" id="progress-label">已選 0 / 7</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="hint-bar">
+        📌 請依正確順序，逐一點選步驟卡片
+        <span id="mode-badge" style="margin-left:0.5rem;background:#e0e0e0;padding:0.1rem 0.6rem;border-radius:999px;font-size:0.85rem"></span>
+      </div>
+
+      <div class="steps-grid" id="steps-grid"></div>
+
+      <div class="action-row">
+        <button class="btn-reset" onclick="resetSelection()">↺ 重新選擇</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" disabled>確認答案 ✓</button>
+      </div>
+    </div>
+
+    <!-- ══ 結果畫面 ══ -->
+    <div id="screen-result" class="screen">
+      <div class="result-header">
+        <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+        <div class="result-score-big" id="result-score"></div>
+        <div class="result-msg" id="result-msg"></div>
+      </div>
+
+      <div class="result-list" id="result-list"></div>
+
+      <div class="action-row" style="flex-wrap:wrap">
+        <button class="btn-submit" onclick="playAgain()">再玩一次 ↺</button>
+        <button class="btn-reset" onclick="backToMode()">換個關卡</button>
+        <a href="../../index.html" class="btn-reset" style="display:inline-block;text-decoration:none;line-height:1;padding:1rem 1.5rem">🏠 回首頁</a>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+    /* ══════════════════════════════════════════
+       步驟資料庫
+    ══════════════════════════════════════════ */
+    const DEFAULT_STEPS = {
+      small: [
+        { id: 1, icon: '🪧', title: '放',  desc: '放三角立牌：清潔中請勿進入，保護清掃人員安全',                                   tools: '三角立牌' },
+        { id: 2, icon: '🧻', title: '夾',  desc: '夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                         tools: '次氯酸水' },
+        { id: 3, icon: '💦', title: '噴',  desc: '多功能清潔劑噴入馬桶內及內側，讓清潔劑先發揮作用',                               tools: '多功能清潔劑' },
+        { id: 4, icon: '🪥', title: '刷',  desc: '馬桶刷刷洗馬桶；坐式加強出水孔、蹲式加強水泥縫和出水孔',                         tools: '馬桶刷' },
+        { id: 5, icon: '🧽', title: '洗',  desc: '噴多功能清潔劑；邊角刷刷縫隙、綠色海綿刷檯面、咖啡布擦乾、魚鱗布擦鏡',           tools: '邊角刷、綠色海綿、咖啡布、魚鱗布' },
+        { id: 6, icon: '🧴', title: '擦',  desc: '藍色布噴次氯酸水擦馬桶座（皮膚接觸面）；咖啡布擦馬桶外部和牆面',                 tools: '次氯酸水、藍色布、咖啡布' },
+        { id: 7, icon: '🔑', title: '消',  desc: '咖啡布一網打盡：擦門把、門鎖等所有接觸面',                                       tools: '次氯酸水、咖啡布' },
+        { id: 8, icon: '📦', title: '補',  desc: '補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                               tools: '酒精、洗手乳、擦手紙' },
+        { id: 9, icon: '🧹', title: '歸',  desc: '好神拖加稀釋次氯酸水擦乾地板；所有工具清潔後整理歸位',                           tools: '好神拖、次氯酸水' },
+      ],
+      big: [
+        { id: 1,  icon: '🪧', title: '放',  desc: '放三角立牌：清潔中請勿進入，保護清掃人員安全',                                   tools: '三角立牌' },
+        { id: 2,  icon: '🧻', title: '夾',  desc: '夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                         tools: '次氯酸水' },
+        { id: 3,  icon: '🪣', title: '潑',  desc: '一瓶蓋清潔劑兌一桶水；先潑馬桶再潑地板，可用好神拖桶運送',                       tools: '多功能清潔劑、好神拖桶' },
+        { id: 4,  icon: '🪥', title: '刷',  desc: '刷馬桶內外；大洗加刷：馬桶座墊、架房地板、走道、水溝和水溝蓋',                   tools: '馬桶刷、邊角刷' },
+        { id: 5,  icon: '🧽', title: '洗',  desc: '邊角刷刷縫隙、綠色海綿刷洗手台檯面、咖啡布擦乾、魚鱗布擦鏡',                     tools: '邊角刷、綠色海綿、咖啡布、魚鱗布' },
+        { id: 6,  icon: '🚿', title: '沖',  desc: '沖水沖走清潔劑和汙垢；水不要太多，避免濺濕牆面和感應器',                         tools: '水管' },
+        { id: 7,  icon: '🔰', title: '刮',  desc: '由內而外、由上而下刮水；架房內用小刮刀，外側地板用中大刮刀',                       tools: '小刮刀、中大刮刀' },
+        { id: 8,  icon: '🧺', title: '擦',  desc: '海綿拖把拖地；藍色布擦馬桶座；咖啡布擦馬桶外部和牆面',                           tools: '海綿拖把、藍色布、咖啡布' },
+        { id: 9,  icon: '🔑', title: '消',  desc: '咖啡布擦門把；次氯酸水擦衛生紙盒、酒精盒、扶把等架房內所有物品架',               tools: '次氯酸水、咖啡布' },
+        { id: 10, icon: '📦', title: '補',  desc: '補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                               tools: '酒精、洗手乳、擦手紙' },
+        { id: 11, icon: '🧹', title: '歸',  desc: '好神拖擦乾地板；所有工具清潔整理後歸回物料間',                                   tools: '好神拖' },
+      ]
+    };
+
+    function getActiveSteps() {
+      try {
+        const raw = localStorage.getItem('ctcm_steps_custom');
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return DEFAULT_STEPS;
+    }
+
+    /* ══════════════════════════════════════════
+       遊戲狀態
+    ══════════════════════════════════════════ */
+    let currentMode   = 'small';   // 'small' | 'big'
+    let currentSteps  = [];        // 打亂後的步驟陣列
+    let selectedOrder = [];        // 使用者選的順序（存 step.id）
+
+    /* ══════════════════════════════════════════
+       畫面切換
+    ══════════════════════════════════════════ */
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    /* ══════════════════════════════════════════
+       開始遊戲
+    ══════════════════════════════════════════ */
+    function startGame(mode) {
+      currentMode  = mode;
+      const steps  = getActiveSteps()[mode];
+      currentSteps = shuffle([...steps]);
+      selectedOrder = [];
+      renderCards();
+      updateProgress();
+      document.getElementById('mode-badge').textContent = mode === 'small' ? '🚿 小洗' : '🪣 大洗';
+      showScreen('screen-game');
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    /* ══════════════════════════════════════════
+       渲染卡片
+    ══════════════════════════════════════════ */
+    function renderCards() {
+      const grid = document.getElementById('steps-grid');
+      grid.innerHTML = currentSteps.map(step => {
+        const orderIdx = selectedOrder.indexOf(step.id);
+        const isSelected = orderIdx !== -1;
+        return `
+          <div class="step-card ${isSelected ? 'selected' : ''}"
+               id="card-${step.id}"
+               onclick="toggleCard(${step.id})">
+            ${isSelected ? `<div class="order-badge">${orderIdx + 1}</div>` : ''}
+            <span class="step-icon">${step.icon}</span>
+            <div class="step-title">${step.title}</div>
+            <div class="step-desc">${step.desc}</div>
+            <div class="step-tools">${step.tools}</div>
+          </div>`;
+      }).join('');
+    }
+
+    /* ══════════════════════════════════════════
+       點選卡片
+    ══════════════════════════════════════════ */
+    function toggleCard(id) {
+      const idx = selectedOrder.indexOf(id);
+      if (idx === -1) {
+        selectedOrder.push(id);
+      } else {
+        selectedOrder.splice(idx, 1);
+      }
+      renderCards();
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total  = currentSteps.length;
+      const done   = selectedOrder.length;
+      document.getElementById('progress-label').textContent = `已選 ${done} / ${total}`;
+      document.getElementById('progress-fill').style.width  = `${(done / total) * 100}%`;
+      document.getElementById('btn-submit').disabled = done < total;
+    }
+
+    function resetSelection() {
+      selectedOrder = [];
+      renderCards();
+      updateProgress();
+    }
+
+    /* ══════════════════════════════════════════
+       提交答案
+    ══════════════════════════════════════════ */
+    function submitAnswer() {
+      const steps = getActiveSteps()[currentMode];
+      const total = steps.length;
+      let correctCount = 0;
+
+      // 標記每張卡對錯
+      currentSteps.forEach(step => {
+        const userPos   = selectedOrder.indexOf(step.id) + 1; // 1-based
+        const isCorrect = userPos === step.id;
+        if (isCorrect) correctCount++;
+        const card = document.getElementById(`card-${step.id}`);
+        card.classList.remove('selected');
+        card.classList.add(isCorrect ? 'correct' : 'wrong', 'disabled');
+        card.onclick = null;
+        // 更新徽章顏色已由 CSS 處理
+      });
+
+      // 計算星星
+      const ratio = correctCount / total;
+      let stars, msg;
+      if (ratio === 1) {
+        stars = '⭐⭐⭐'; msg = '太厲害了！全部都對！';
+      } else if (ratio >= 0.7) {
+        stars = '⭐⭐'; msg = '很不錯！再熟悉一下順序吧！';
+      } else {
+        stars = '⭐'; msg = '繼續練習，一定可以的！';
+      }
+
+      // 2 秒後跳結果頁
+      setTimeout(() => showResult(correctCount, total, stars, msg, steps), 1200);
+    }
+
+    /* ══════════════════════════════════════════
+       結果畫面
+    ══════════════════════════════════════════ */
+    function showResult(correct, total, stars, msg, steps) {
+      document.getElementById('result-stars').textContent  = stars;
+      document.getElementById('result-score').textContent  = `${correct} / ${total}`;
+      document.getElementById('result-msg').textContent    = msg;
+
+      const list = document.getElementById('result-list');
+      list.innerHTML = steps.map(step => {
+        const userPos   = selectedOrder.indexOf(step.id) + 1;
+        const isCorrect = userPos === step.id;
+        return `
+          <div class="result-item ${isCorrect ? 'ok' : 'bad'}">
+            <div class="result-step-num">${step.id}</div>
+            <div class="result-step-info">
+              <div class="result-step-title">${step.icon} ${step.title}</div>
+              <div class="result-step-note">${step.desc}</div>
+            </div>
+            <div class="result-check">${isCorrect ? '✅' : `❌ 你選了第 ${userPos} 步`}</div>
+          </div>`;
+      }).join('');
+
+      showScreen('screen-result');
+    }
+
+    /* ══════════════════════════════════════════
+       再玩 / 換關卡
+    ══════════════════════════════════════════ */
+    function playAgain() { startGame(currentMode); }
+    function backToMode() { showScreen('screen-mode'); }
+  </script>
+</body>
+</html>

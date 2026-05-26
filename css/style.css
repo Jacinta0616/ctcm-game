@@ -1,0 +1,385 @@
+/* ==========================================
+   CTCM Game — 共用樣式
+   ========================================== */
+
+:root {
+  --green-dark:    #2e7d32;
+  --green-mid:     #43a047;
+  --green-light:   #a5d6a7;
+  --green-bg:      #e8f5e9;
+  --yellow:        #fff9c4;
+  --orange-light:  #fff3e0;
+  --blue-light:    #e3f2fd;
+  --text:          #2e2e2e;
+  --text-light:    #757575;
+  --white:         #ffffff;
+  --shadow-sm:     0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-md:     0 8px 32px rgba(0, 0, 0, 0.13);
+  --radius-xl:     32px;
+  --radius-lg:     24px;
+  --radius-md:     16px;
+  --radius-sm:     10px;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+  background: linear-gradient(155deg, #e8f5e9 0%, #f9fbe7 45%, #e0f2f1 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+/* ── 背景浮葉 ── */
+.bg-deco {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.leaf {
+  position: absolute;
+  opacity: 0.25;
+  animation: floatLeaf 9s ease-in-out infinite;
+  user-select: none;
+}
+
+@keyframes floatLeaf {
+  0%,100% { transform: translateY(0)   rotate(0deg); }
+  33%      { transform: translateY(-22px) rotate(12deg); }
+  66%      { transform: translateY(10px)  rotate(-8deg); }
+}
+
+/* ── 整體容器 ── */
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: none;
+  padding: 1rem 2rem 2rem;
+}
+
+/* ── 頂部標題 ── */
+.header {
+  text-align: center;
+  padding: 1.5rem 0 3rem;
+}
+
+.mascot {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mascot-emoji {
+  font-size: 4.5rem;
+  display: inline-block;
+  animation: mascotBounce 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
+}
+
+.mascot-right {
+  animation-delay: 0.4s;
+}
+
+@keyframes mascotBounce {
+  0%,100% { transform: translateY(0)    scale(1); }
+  50%      { transform: translateY(-14px) scale(1.07); }
+}
+
+.title {
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  font-weight: 900;
+  color: var(--green-dark);
+  letter-spacing: 0.06em;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2.8vw, 1.25rem);
+  color: var(--text-light);
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
+/* ── 區塊標題 ── */
+.section-title {
+  text-align: center;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 1.8rem;
+}
+
+/* ── 遊戲卡片格 ── */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.6rem;
+}
+
+/* ── 單張遊戲卡片 ── */
+.game-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 2.2rem 1.8rem 1.8rem;
+  box-shadow: var(--shadow-sm);
+  border: 3px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.game-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: var(--shadow-md);
+}
+
+/* 各卡片主題色 */
+.card-quiz:hover   { border-color: #fbc02d; }
+.card-sort:hover   { border-color: var(--green-mid); }
+.card-steps:hover  { border-color: #42a5f5; }
+
+/* ── 卡片圖示 ── */
+.card-icon {
+  font-size: 4.5rem;
+  line-height: 1;
+  animation: iconWiggle 3.5s ease-in-out infinite;
+}
+
+.card-quiz  .card-icon { animation-delay: 0s;    }
+.card-sort  .card-icon { animation-delay: 0.7s;  }
+.card-steps .card-icon { animation-delay: 1.4s;  }
+
+@keyframes iconWiggle {
+  0%,100% { transform: scale(1)    rotate(0deg); }
+  40%      { transform: scale(1.12) rotate(6deg); }
+  60%      { transform: scale(1.12) rotate(-4deg); }
+}
+
+/* ── 卡片文字 ── */
+.card-body {
+  text-align: center;
+  flex: 1;
+}
+
+.card-body h3 {
+  font-size: clamp(1.3rem, 3.5vw, 1.65rem);
+  font-weight: 700;
+  color: var(--green-dark);
+  margin-bottom: 0.5rem;
+}
+
+.card-body p {
+  font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+  color: var(--text-light);
+  line-height: 1.7;
+}
+
+/* ── 開始遊戲按鈕 ── */
+.btn-play {
+  display: block;
+  width: 100%;
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.5rem;
+  font-size: clamp(1rem, 2.5vw, 1.15rem);
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.05em;
+  transition: filter 0.2s, transform 0.2s;
+  margin-top: auto;
+}
+
+.game-card:hover .btn-play {
+  filter: brightness(1.1);
+  transform: scale(1.03);
+}
+
+/* 各主題按鈕顏色 */
+.card-quiz  .btn-play { background: linear-gradient(135deg, #fbc02d, #f57f17); }
+.card-sort  .btn-play { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); }
+.card-steps .btn-play { background: linear-gradient(135deg, #42a5f5, #1565c0); }
+.card-assign .btn-play { background: linear-gradient(135deg, #ce93d8, #6a1b9a); }
+
+/* 適才適所卡片 */
+.card-assign:hover  { border-color: #ab47bc; }
+.card-assign .card-icon { animation-delay: 2.1s; }
+
+/* ── 後台管理按鈕 ── */
+.btn-admin {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid var(--green-light);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--text-light);
+  text-decoration: none;
+  z-index: 200;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-admin:hover {
+  background: white;
+  border-color: var(--green-mid);
+  color: var(--green-dark);
+  transform: scale(1.05);
+}
+
+/* ── 遊戲頁面通用 ── */
+
+/* 頂部導覽列 */
+.game-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+  border: 2px solid var(--green-light);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--green-dark);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: var(--green-bg);
+  border-color: var(--green-mid);
+}
+
+.game-title-bar {
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  font-weight: 900;
+  color: var(--green-dark);
+}
+
+/* 分數顯示 */
+.score-board {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--green-dark);
+}
+
+/* 結束畫面 */
+.result-screen {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  animation: fadeInUp 0.5s ease;
+}
+
+.result-emoji {
+  font-size: 6rem;
+  display: block;
+  animation: mascotBounce 1.5s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+.result-score {
+  font-size: clamp(2rem, 8vw, 4rem);
+  font-weight: 900;
+  color: var(--green-dark);
+  margin: 0.5rem 0;
+}
+
+.result-message {
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  color: var(--text-light);
+  margin-bottom: 2rem;
+}
+
+.btn-restart {
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin: 0.5rem;
+}
+
+.btn-restart:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+
+/* ── 動畫工具 ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+
+.anim-pop  { animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.anim-shake { animation: shake 0.4s ease; }
+
+/* ── RWD ── */
+@media (max-width: 520px) {
+  .mascot-emoji { font-size: 3.5rem; }
+}
+
+/* ── 橫式滿版 ── */
+@media (orientation: landscape) {
+  .container { padding: 0.6rem 2rem 1rem; }
+  .header { padding: 0.8rem 0 1rem; }
+  .mascot-emoji { font-size: 3rem; }
+  .title { font-size: clamp(1.6rem, 4vw, 2.8rem); }
+}

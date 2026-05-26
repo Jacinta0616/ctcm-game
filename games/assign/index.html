@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>適才適所 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 進度條 ── */
+    .progress-wrap  { margin-bottom: 1rem; text-align: center; }
+    .progress-label { font-size: 1.05rem; font-weight: 600; color: var(--text-light); margin-bottom: 0.5rem; }
+    .progress-track { background: var(--green-light); border-radius: 999px; height: 16px; overflow: hidden; }
+    .progress-fill  { background: linear-gradient(90deg, #ab47bc, #6a1b9a); height: 100%; border-radius: 999px; transition: width 0.45s ease; }
+
+    /* ── 任務卡片 ── */
+    .task-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      border: 3px solid #e1bee7;
+      padding: 2rem 2rem 1.6rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      animation: fadeInUp 0.3s ease;
+    }
+    .task-icon-big {
+      font-size: 5.5rem;
+      display: block;
+      line-height: 1.15;
+      animation: iconWiggle 3s ease-in-out infinite;
+      margin-bottom: 0.4rem;
+    }
+    .task-title-big {
+      font-size: 2.8rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 0.4rem;
+      line-height: 1;
+    }
+    .task-desc-text {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    /* ── 回饋訊息 ── */
+    .feedback-bar {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      min-height: 3.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      transition: opacity 0.2s;
+    }
+    .fb-empty   { visibility: hidden; }
+    .fb-correct { background: #e8f5e9; color: #2e7d32; border: 2px solid #a5d6a7; animation: popIn 0.35s ease; }
+    .fb-wrong   { background: #ffebee; color: #c62828; border: 2px solid #ef9a9a; animation: shake 0.45s ease; }
+
+    /* ── 等級按鈕 ── */
+    .level-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .level-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 1.4rem 0.5rem;
+      border: 3px solid transparent;
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.25s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .level-btn:hover:not(:disabled) {
+      transform: translateY(-6px) scale(1.04);
+      box-shadow: var(--shadow-md);
+    }
+    .level-btn:active:not(:disabled) { transform: scale(0.95); }
+    .btn-light { background: #fff9c4; border-color: #fbc02d; }
+    .btn-mid   { background: #fff3e0; border-color: #ff9800; }
+    .btn-heavy { background: #ffebee; border-color: #f44336; }
+
+    .level-btn-icon  { font-size: 2.8rem; line-height: 1; }
+    .level-btn-label {
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      font-weight: 900;
+      color: var(--text);
+    }
+    .level-btn-sub {
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* 答對 / 答錯 */
+    .level-btn.correct {
+      transform: scale(1.06) !important;
+      box-shadow: var(--shadow-md) !important;
+    }
+    .btn-light.correct { background: #e8f5e9 !important; border-color: #43a047 !important; }
+    .btn-mid.correct   { background: #e8f5e9 !important; border-color: #43a047 !important; }
+    .btn-heavy.correct { background: #e8f5e9 !important; border-color: #43a047 !important; }
+    .level-btn.wrong   { animation: shake 0.45s ease; }
+
+    /* ── 開始畫面 ── */
+    .start-wrap   { text-align: center; padding: 2.5rem 1rem; }
+    .start-mascot { font-size: 6rem; display: block; animation: mascotBounce 2s ease-in-out infinite; margin-bottom: 1rem; }
+    .start-title  { font-size: 2.2rem; font-weight: 900; color: var(--green-dark); margin-bottom: 0.8rem; }
+    .start-desc   { font-size: 1.1rem; color: var(--text-light); line-height: 1.9; margin-bottom: 1.5rem; }
+
+    /* 等級說明 */
+    .level-intro {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
+    .level-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .level-badge-light  { background: #fff9c4; color: #f57f17; border: 2px solid #fbc02d; }
+    .level-badge-mid    { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+    .level-badge-heavy  { background: #ffebee; color: #c62828; border: 2px solid #f44336; }
+
+    /* ── 結果畫面 ── */
+    .result-stars   { font-size: 2.2rem; letter-spacing: 0.15em; margin: 0.8rem 0; animation: popIn 0.6s ease; }
+    .result-actions { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; margin-top: 1.5rem; }
+
+    /* ── 工具 ── */
+    .hidden { display: none !important; }
+
+    /* ── 橫式滿版 ── */
+    @media (orientation: landscape) {
+      .start-wrap   { padding: 1.5rem 1rem; }
+      .start-mascot { font-size: 4rem; margin-bottom: 0.6rem; }
+      .start-title  { font-size: 1.8rem; }
+      .start-desc   { font-size: 1rem; margin-bottom: 1rem; }
+      .level-intro  { margin-bottom: 1.2rem; }
+
+      .task-card { padding: 1.2rem 2rem 1rem; margin-bottom: 0.7rem; }
+      .task-icon-big  { font-size: 3.8rem; }
+      .task-title-big { font-size: 2.2rem; }
+      .task-desc-text { font-size: 1rem; }
+
+      .feedback-bar { min-height: 2.6rem; font-size: 1rem; margin-bottom: 0.7rem; }
+
+      .level-btn { padding: 1rem 0.5rem; }
+      .level-btn-icon  { font-size: 2.2rem; }
+      .level-btn-label { font-size: 1.3rem; }
+
+      .result-screen { padding: 1.5rem 1rem; }
+      .result-emoji  { font-size: 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 背景裝飾 -->
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:4%;font-size:1.8rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:20%;right:6%;font-size:2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="top:55%;left:2%;font-size:1.4rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:20%;right:4%;font-size:1.8rem;animation-delay:2s">🍀</span>
+  </div>
+
+  <div class="container">
+
+    <!-- 頂部導覽 -->
+    <nav class="game-nav">
+      <a href="../../index.html" class="btn-back">← 回首頁</a>
+      <span class="game-title-bar">🤝 適才適所</span>
+      <div class="score-board">🏆 <span id="score">0</span> 分</div>
+    </nav>
+
+    <!-- ① 開始畫面 -->
+    <div id="screen-start" class="screen">
+      <div class="start-wrap">
+        <span class="start-mascot">🤝</span>
+        <h2 class="start-title">適才適所</h2>
+        <p class="start-desc">
+          看看每個清潔任務的說明<br>
+          幫它分配到正確的體力組別！<br>
+          共 <strong>12 題</strong>，每題 <strong>10 分</strong>
+        </p>
+        <div class="level-intro">
+          <div class="level-badge level-badge-light">🟡 輕量級 — 慢活自在組</div>
+          <div class="level-badge level-badge-mid">🟠 中量級 — 活力充沛組</div>
+          <div class="level-badge level-badge-heavy">🔴 重量級 — 承擔重任組</div>
+        </div>
+        <button class="btn-restart" onclick="startGame()">開始遊戲！</button>
+      </div>
+    </div>
+
+    <!-- ② 遊戲畫面 -->
+    <div id="screen-game" class="screen hidden">
+
+      <!-- 進度條 -->
+      <div class="progress-wrap">
+        <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 12 題</div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- 任務卡片 -->
+      <div class="task-card" id="task-card">
+        <span class="task-icon-big" id="task-icon">🪧</span>
+        <div class="task-title-big" id="task-title">放</div>
+        <div class="task-desc-text" id="task-desc">在架房門口放三角立牌</div>
+      </div>
+
+      <!-- 回饋訊息 -->
+      <div id="feedback" class="feedback-bar fb-empty">　</div>
+
+      <!-- 等級選擇按鈕 -->
+      <div class="level-buttons">
+        <button class="level-btn btn-light" id="btn-light" onclick="selectLevel('輕量級')">
+          <span class="level-btn-icon">🟡</span>
+          <span class="level-btn-label">輕量級</span>
+          <span class="level-btn-sub">慢活自在組</span>
+        </button>
+        <button class="level-btn btn-mid" id="btn-mid" onclick="selectLevel('中量級')">
+          <span class="level-btn-icon">🟠</span>
+          <span class="level-btn-label">中量級</span>
+          <span class="level-btn-sub">活力充沛組</span>
+        </button>
+        <button class="level-btn btn-heavy" id="btn-heavy" onclick="selectLevel('重量級')">
+          <span class="level-btn-icon">🔴</span>
+          <span class="level-btn-label">重量級</span>
+          <span class="level-btn-sub">承擔重任組</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ③ 結果畫面 -->
+    <div id="screen-result" class="screen hidden">
+      <div class="result-screen">
+        <span id="result-emoji" class="result-emoji">🏆</span>
+        <p id="result-score" class="result-score">120 分</p>
+        <div id="result-stars" class="result-stars"></div>
+        <p id="result-msg" class="result-message">太厲害了！</p>
+        <div class="result-actions">
+          <button class="btn-restart" onclick="startGame()">再玩一次 ↺</button>
+          <a href="../../index.html" class="btn-back">← 回首頁</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+  /* ==========================================
+     適才適所遊戲邏輯
+     12 道清潔任務，依體力分配至 輕/中/重量級
+  ========================================== */
+
+  /* ── 任務資料 ── */
+  const TASKS = [
+    // 輕量級（慢活自在組）
+    {
+      icon: '🪧', title: '放',
+      desc: '在架房門口放三角立牌，提醒清潔中請勿進入',
+      level: '輕量級',
+      explain: '放立牌只需步行擺放，體力消耗低！',
+    },
+    {
+      icon: '💦', title: '噴',
+      desc: '將多功能清潔劑噴入馬桶內及內側，讓清潔劑預先發揮作用',
+      level: '輕量級',
+      explain: '按壓噴瓶即可，是輕鬆的輕量作業！',
+    },
+    {
+      icon: '🔑', title: '消',
+      desc: '用咖啡布噴次氯酸水，擦拭門把、門鎖等所有接觸面',
+      level: '輕量級',
+      explain: '拿噴瓶和布擦拭，體力消耗低，但要仔細！',
+    },
+    {
+      icon: '📦', title: '補',
+      desc: '補充酒精、洗手乳、擦手紙等物料，維持架房整備',
+      level: '輕量級',
+      explain: '拿取小物品補充，是輕量作業！',
+    },
+    {
+      icon: '🧹', title: '歸',
+      desc: '清潔工具後整理歸位，保持物料間整齊',
+      level: '輕量級',
+      explain: '整理歸位需要細心但不費力，屬輕量級！',
+    },
+    // 中量級（活力充沛組）
+    {
+      icon: '🧻', title: '夾',
+      desc: '用夾子取走架房內用過的擦手紙和衛生紙',
+      level: '中量級',
+      explain: '需要彎腰和反覆操作夾子，屬中量級作業！',
+    },
+    {
+      icon: '🪣', title: '潑',
+      desc: '端水桶將稀釋清潔劑潑到馬桶和地板（一瓶蓋兌一桶水）',
+      level: '中量級',
+      explain: '端水桶需要一定臂力，屬中量級作業！',
+    },
+    {
+      icon: '🧴', title: '擦',
+      desc: '藍色布擦馬桶座、咖啡布擦馬桶外部和牆面',
+      level: '中量級',
+      explain: '需要蹲姿和反覆擦拭動作，屬中量級！',
+    },
+    {
+      icon: '🔰', title: '刮',
+      desc: '用刮刀由內而外、由上而下刮掉地板積水',
+      level: '中量級',
+      explain: '連續推拉刮水需要持續出力，屬中量級！',
+    },
+    // 重量級（承擔重任組）
+    {
+      icon: '🪥', title: '刷',
+      desc: '馬桶刷刷洗馬桶內外，大洗還要加刷地板、走道和水溝',
+      level: '重量級',
+      explain: '彎腰施力大面積刷洗，體力消耗大，屬重量級！',
+    },
+    {
+      icon: '🧽', title: '洗',
+      desc: '用邊角刷、綠色海綿刷洗洗手台檯面和縫隙',
+      level: '重量級',
+      explain: '反覆用力刷洗，屬重量級作業！',
+    },
+    {
+      icon: '🧺', title: '拖',
+      desc: '用好神拖或海綿拖把拖乾整個地板',
+      level: '重量級',
+      explain: '推拉大型拖把需要持續體力，屬重量級！',
+    },
+  ];
+
+  /* ── 遊戲狀態 ── */
+  const state = {
+    tasks:   [],
+    current: 0,
+    score:   0,
+    total:   12,
+    lock:    false,
+  };
+
+  /* ── 工具 ── */
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('screen-' + id).classList.remove('hidden');
+  }
+
+  /* ── 開始遊戲 ── */
+  function startGame() {
+    state.tasks   = shuffle([...TASKS]);
+    state.current = 0;
+    state.score   = 0;
+    state.lock    = false;
+    updateScore();
+    showScreen('game');
+    renderTask();
+  }
+
+  /* ── 渲染任務卡片 ── */
+  function renderTask() {
+    const t = state.tasks[state.current];
+
+    document.getElementById('task-icon').textContent  = t.icon;
+    document.getElementById('task-title').textContent = t.title;
+    document.getElementById('task-desc').textContent  = t.desc;
+    document.getElementById('q-cur').textContent      = state.current + 1;
+    document.getElementById('progress-fill').style.width =
+      ((state.current / state.total) * 100) + '%';
+
+    // 重設按鈕狀態
+    ['btn-light', 'btn-mid', 'btn-heavy'].forEach(id => {
+      const btn = document.getElementById(id);
+      btn.classList.remove('correct', 'wrong');
+      btn.disabled = false;
+    });
+
+    // 清除回饋
+    const fb = document.getElementById('feedback');
+    fb.className   = 'feedback-bar fb-empty';
+    fb.textContent = '　';
+
+    // 進場動畫
+    const card = document.getElementById('task-card');
+    card.classList.remove('anim-pop');
+    void card.offsetWidth;
+    card.classList.add('anim-pop');
+  }
+
+  /* ── 選擇等級 ── */
+  function selectLevel(chosen) {
+    if (state.lock) return;
+    state.lock = true;
+
+    const t         = state.tasks[state.current];
+    const isCorrect = chosen === t.level;
+
+    // 鎖定所有按鈕，標示對錯
+    const levelMap = { '輕量級': 'btn-light', '中量級': 'btn-mid', '重量級': 'btn-heavy' };
+    Object.entries(levelMap).forEach(([lv, id]) => {
+      const btn = document.getElementById(id);
+      btn.disabled = true;
+      if (lv === t.level)                    btn.classList.add('correct');
+      if (lv === chosen && !isCorrect)       btn.classList.add('wrong');
+    });
+
+    // 加分
+    if (isCorrect) {
+      state.score += 10;
+      updateScore();
+    }
+
+    // 回饋訊息
+    const fb = document.getElementById('feedback');
+    if (isCorrect) {
+      fb.textContent = '✓ 答對了！' + t.explain;
+      fb.className   = 'feedback-bar fb-correct';
+    } else {
+      fb.textContent = '✗ 正確答案是「' + t.level + '」～' + t.explain;
+      fb.className   = 'feedback-bar fb-wrong';
+    }
+
+    // 1.8 秒後進下一題
+    setTimeout(() => {
+      state.current++;
+      state.lock = false;
+      if (state.current >= state.total) {
+        showResult();
+      } else {
+        renderTask();
+      }
+    }, 1800);
+  }
+
+  /* ── 更新分數顯示 ── */
+  function updateScore() {
+    document.getElementById('score').textContent = state.score;
+  }
+
+  /* ── 顯示結果 ── */
+  function showResult() {
+    const pct = state.score / (state.total * 10);
+    let emoji, msg, stars;
+
+    if      (pct >= 1.0) { emoji = '🏆'; msg = '滿分！你是適才適所大師！';           stars = '⭐⭐⭐⭐⭐'; }
+    else if (pct >= 0.8) { emoji = '🌟'; msg = '非常厲害！幾乎全對！';               stars = '⭐⭐⭐⭐'; }
+    else if (pct >= 0.6) { emoji = '👍'; msg = '不錯哦！再多練習就能全對！';         stars = '⭐⭐⭐'; }
+    else if (pct >= 0.4) { emoji = '💪'; msg = '還有進步空間，繼續加油！';           stars = '⭐⭐'; }
+    else                  { emoji = '📚'; msg = '多了解一下各任務難度，下次會更好！'; stars = '⭐'; }
+
+    document.getElementById('result-emoji').textContent = emoji;
+    document.getElementById('result-score').textContent = state.score + ' 分';
+    document.getElementById('result-stars').textContent = stars;
+    document.getElementById('result-msg').textContent   = msg;
+
+    document.getElementById('progress-fill').style.width = '100%';
+    showScreen('result');
+  }
+  </script>
+
+</body>
+</html>

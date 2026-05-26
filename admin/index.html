@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>後台管理 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green:      #43a047;
+      --green-dark: #2e7d32;
+      --green-bg:   #e8f5e9;
+      --red:        #e53935;
+      --red-bg:     #ffebee;
+      --blue-bg:    #e3f2fd;
+      --blue:       #1565c0;
+      --text:       #2e2e2e;
+      --text-light: #757575;
+      --border:     #e0e0e0;
+      --bg:         #f5f5f5;
+      --white:      #ffffff;
+      --radius:     12px;
+      --shadow:     0 2px 12px rgba(0,0,0,0.08);
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      min-height: 100vh;
+    }
+
+    /* ── 登入畫面 ── */
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .login-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+    }
+    .login-icon { font-size: 4rem; margin-bottom: 1rem; }
+    .login-card h2 { font-size: 1.8rem; font-weight: 900; color: var(--green-dark); margin-bottom: 0.5rem; }
+    .login-card p  { color: var(--text-light); margin-bottom: 1.5rem; }
+    .login-pw-hint { font-size: 0.85rem; color: var(--text-light); margin-top: 1rem; }
+    .login-error { color: var(--red); font-size: 0.9rem; margin-top: 0.5rem; min-height: 1.2rem; }
+
+    /* ── 共用輸入元件 ── */
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--green); }
+    textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+    /* ── 共用按鈕 ── */
+    .btn-primary {
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.7rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { filter: brightness(1.1); }
+    .btn-primary.full  { width: 100%; padding: 0.9rem; font-size: 1.1rem; }
+
+    .btn-danger {
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .btn-danger:hover { filter: brightness(1.1); }
+
+    .btn-outline {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--green); background: var(--green-bg); }
+
+    .btn-sm-edit {
+      background: #e3f2fd;
+      color: var(--blue);
+      border: none;
+      border-radius: 8px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-sm-del {
+      background: var(--red-bg);
+      color: var(--red);
+      border: none;
+      border-radius: 8px;
+      padding: 0.35rem 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* ── 頂部導覽 ── */
+    .admin-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+      padding: 0.9rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .admin-nav-title { font-size: 1.3rem; font-weight: 900; color: var(--green-dark); }
+    .admin-nav-actions { display: flex; gap: 0.6rem; align-items: center; }
+
+    /* ── Tab 導覽 ── */
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+      padding: 0 1.5rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 0.9rem 1.2rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      color: var(--text-light);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.2s, border-color 0.2s;
+      margin-bottom: -2px;
+    }
+    .tab-btn.active { color: var(--green-dark); border-bottom-color: var(--green); }
+    .tab-btn:hover  { color: var(--green); }
+
+    /* ── 分頁內容 ── */
+    .tab-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* 工具列 */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1.2rem;
+      flex-wrap: wrap;
+    }
+    .count-label { font-size: 0.9rem; color: var(--text-light); flex: 1; }
+
+    /* ── 列表卡片 ── */
+    .item-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      padding: 1rem 1.2rem;
+      margin-bottom: 0.7rem;
+      transition: border-color 0.2s;
+    }
+    .item-card:hover { border-color: #bdbdbd; }
+
+    .item-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+    .item-actions { margin-left: auto; display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .item-q    { font-weight: 600; font-size: 0.95rem; line-height: 1.5; flex: 1; }
+    .item-meta { font-size: 0.85rem; color: var(--text-light); margin-top: 0.25rem; }
+
+    /* 標籤 */
+    .tag {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .tag-green { background: var(--green-bg); color: var(--green-dark); }
+    .tag-blue  { background: var(--blue-bg);  color: var(--blue); }
+
+    /* 空狀態 */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-light);
+      font-size: 1.05rem;
+    }
+    .empty-state span { font-size: 3rem; display: block; margin-bottom: 0.8rem; }
+
+    /* ── 設定區 ── */
+    .settings-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      padding: 1.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .settings-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; color: var(--green-dark); }
+    .form-row { margin-bottom: 0.9rem; }
+    .form-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; display: block; }
+
+    /* ── 表單 overlay ── */
+    .form-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 2rem 1rem;
+      overflow-y: auto;
+    }
+    .form-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .form-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .form-card-title { font-size: 1.3rem; font-weight: 900; color: var(--green-dark); }
+    .btn-close {
+      background: var(--bg);
+      border: none;
+      border-radius: 50%;
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+    }
+    .btn-close:hover { background: var(--border); }
+    .form-footer {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.5rem;
+      justify-content: flex-end;
+    }
+    .opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #212121;
+      color: white;
+      padding: 0.7rem 1.5rem;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      z-index: 999;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    /* ── 工具 ── */
+    .hidden { display: none !important; }
+
+    @media (max-width: 520px) {
+      .opts-grid { grid-template-columns: 1fr; }
+      .tab-btn   { padding: 0.7rem 0.8rem; font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ① 登入畫面 -->
+  <div id="screen-login" class="login-wrap">
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h2>後台管理</h2>
+      <p>請輸入管理密碼</p>
+      <input type="password" id="pw-input" placeholder="輸入密碼…" autocomplete="current-password">
+      <div id="login-error" class="login-error"></div>
+      <button class="btn-primary full" onclick="doLogin()" style="margin-top:1rem">登入</button>
+      <p class="login-pw-hint">預設密碼：ctcm2026</p>
+    </div>
+  </div>
+
+  <!-- ② 管理主畫面 -->
+  <div id="screen-admin" class="hidden">
+
+    <!-- 頂部導覽 -->
+    <nav class="admin-nav">
+      <span class="admin-nav-title">⚙️ 後台管理</span>
+      <div class="admin-nav-actions">
+        <a href="../index.html" class="btn-outline">← 回首頁</a>
+        <button class="btn-outline" onclick="doLogout()">登出</button>
+      </div>
+    </nav>
+
+    <!-- Tab 列 -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="quiz"     onclick="switchTab('quiz')">💡 答題題目</button>
+      <button class="tab-btn"        data-tab="sorting"  onclick="switchTab('sorting')">♻️ 垃圾分類物品</button>
+      <button class="tab-btn"        data-tab="steps"    onclick="switchTab('steps')">🧹 清潔步驟</button>
+      <button class="tab-btn"        data-tab="settings" onclick="switchTab('settings')">🔧 設定</button>
+    </div>
+
+    <!-- Tab: 答題題目 -->
+    <div id="tab-quiz" class="tab-content">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openForm('quiz', null)">＋ 新增題目</button>
+        <span class="count-label" id="quiz-count"></span>
+        <button class="btn-danger" onclick="resetToDefault('quiz')">↺ 重置預設</button>
+      </div>
+      <div id="quiz-list"></div>
+    </div>
+
+    <!-- Tab: 垃圾分類物品 -->
+    <div id="tab-sorting" class="tab-content hidden">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openForm('sorting', null)">＋ 新增物品</button>
+        <span class="count-label" id="sorting-count"></span>
+        <button class="btn-danger" onclick="resetToDefault('sorting')">↺ 重置預設</button>
+      </div>
+      <div id="sorting-list"></div>
+    </div>
+
+    <!-- Tab: 清潔步驟 -->
+    <div id="tab-steps" class="tab-content hidden">
+      <div class="tab-actions">
+        <span id="steps-count" class="item-count">小洗 9 步 ／ 大洗 11 步</span>
+        <button class="btn-danger" onclick="resetToDefault('steps')">↺ 重置預設</button>
+      </div>
+
+      <div style="background:#fff9c4;border:2px solid #fbc02d;border-radius:12px;padding:0.7rem 1.1rem;margin-bottom:1.2rem;font-size:0.9rem;color:#f57f17;line-height:1.7">
+        💡 步驟順序固定，只能編輯各步驟的大標、說明與工具。
+      </div>
+
+      <div class="section-label" style="font-weight:900;color:var(--green-dark);font-size:1.1rem;margin-bottom:0.8rem">🚿 架房小洗（9 步驟）</div>
+      <div id="steps-small-list"></div>
+
+      <div class="section-label" style="font-weight:900;color:#1565c0;font-size:1.1rem;margin:1.5rem 0 0.8rem">🪣 架房大洗（11 步驟）</div>
+      <div id="steps-big-list"></div>
+    </div>
+
+    <!-- Tab: 設定 -->
+    <div id="tab-settings" class="tab-content hidden">
+
+      <!-- Google Sheets 設定 -->
+      <div class="settings-card">
+        <h3>📊 Google Sheets 串接</h3>
+        <p style="color:var(--text-light);font-size:0.95rem;margin-bottom:1.2rem;line-height:1.8">
+          設定後，遊戲題目可以從 Google 試算表自動同步。<br>
+          Apps Script 程式碼請參考 <code style="background:#f5f5f5;padding:0.1rem 0.4rem;border-radius:4px">admin/apps-script.js</code>
+        </p>
+        <div class="form-row">
+          <label class="form-label">Apps Script 網址</label>
+          <input type="text" id="script-url" placeholder="https://script.google.com/macros/s/...">
+        </div>
+        <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-top:0.5rem">
+          <button class="btn-primary" onclick="saveScriptUrl()">儲存網址</button>
+          <button class="btn-outline" id="btn-sync" onclick="manualSync()">🔄 立即同步</button>
+          <span id="sync-status" style="font-size:0.85rem;color:var(--text-light)"></span>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h3>🔑 修改管理密碼</h3>
+        <div class="form-row">
+          <label class="form-label">目前密碼</label>
+          <input type="password" id="pw-current" placeholder="輸入目前密碼">
+        </div>
+        <div class="form-row">
+          <label class="form-label">新密碼</label>
+          <input type="password" id="pw-new" placeholder="輸入新密碼">
+        </div>
+        <div class="form-row">
+          <label class="form-label">確認新密碼</label>
+          <input type="password" id="pw-confirm" placeholder="再輸入一次新密碼">
+        </div>
+        <button class="btn-primary" onclick="changePassword()">更新密碼</button>
+      </div>
+
+      <div class="settings-card">
+        <h3>🗑️ 清除所有自訂資料</h3>
+        <p style="color:var(--text-light);font-size:0.95rem;margin-bottom:1rem;line-height:1.7">
+          清除後，所有遊戲將回到預設題目。<br>此操作無法復原，請謹慎操作。
+        </p>
+        <button class="btn-danger" onclick="clearAllData()">清除全部自訂資料</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ③ 新增／編輯 表單 overlay -->
+  <div id="form-overlay" class="form-overlay hidden" onclick="handleOverlayClick(event)">
+    <div class="form-card" id="form-card">
+      <div class="form-card-header">
+        <span class="form-card-title" id="form-title">新增題目</span>
+        <button class="btn-close" onclick="closeForm()">✕</button>
+      </div>
+
+      <!-- 答題題目表單 -->
+      <div id="quiz-form">
+        <div class="form-row">
+          <label class="form-label">主題分類</label>
+          <select id="f-cat">
+            <option value="recycling">垃圾分類</option>
+            <option value="cleaning">架房清潔</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">題目內容</label>
+          <textarea id="f-q" placeholder="輸入題目…"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">四個選項</label>
+          <div class="opts-grid">
+            <input type="text" id="f-opt-a" placeholder="選項 A">
+            <input type="text" id="f-opt-b" placeholder="選項 B">
+            <input type="text" id="f-opt-c" placeholder="選項 C">
+            <input type="text" id="f-opt-d" placeholder="選項 D">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">正確答案</label>
+          <select id="f-correct">
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">解析說明（答題後顯示）</label>
+          <textarea id="f-explain" placeholder="輸入解析說明…"></textarea>
+        </div>
+      </div>
+
+      <!-- 垃圾分類物品表單 -->
+      <div id="sorting-form" class="hidden">
+        <div class="form-row">
+          <label class="form-label">物品名稱</label>
+          <input type="text" id="f-name" placeholder="例如：報紙">
+        </div>
+        <div class="form-row">
+          <label class="form-label">圖示（Emoji）</label>
+          <input type="text" id="f-emoji" placeholder="例如：📰（複製 emoji 貼上）">
+        </div>
+        <div class="form-row">
+          <label class="form-label">所屬類別</label>
+          <select id="f-bin">
+            <option value="一般垃圾">🗑️ 一般垃圾</option>
+            <option value="紙類">📰 紙類</option>
+            <option value="塑膠">🧴 塑膠</option>
+            <option value="金屬">🥫 金屬</option>
+            <option value="玻璃">🍾 玻璃</option>
+            <option value="廚餘">🥕 廚餘</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">答題後提示說明</label>
+          <input type="text" id="f-hint" placeholder="例如：乾淨的報紙可以回收">
+        </div>
+      </div>
+
+      <!-- 清潔步驟表單 -->
+      <div id="steps-form" class="hidden">
+        <div class="form-row">
+          <label class="form-label">圖示（Emoji）</label>
+          <input type="text" id="f-step-icon" placeholder="例如：🧽">
+        </div>
+        <div class="form-row">
+          <label class="form-label">大標（步驟名稱）</label>
+          <input type="text" id="f-step-title" placeholder="例如：刷洗手台">
+        </div>
+        <div class="form-row">
+          <label class="form-label">說明</label>
+          <textarea id="f-step-desc" placeholder="簡短說明這個步驟的重點…"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">所需工具</label>
+          <input type="text" id="f-step-tools" placeholder="例如：藍色海綿、邊角刷">
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-outline" onclick="closeForm()">取消</button>
+        <button class="btn-primary" onclick="saveForm()">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 通知 -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+  /* ==========================================
+     後台管理邏輯
+  ========================================== */
+
+  /* ── 預設資料（與遊戲檔案同步）── */
+
+  const DEFAULT_QUIZ = [
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪個應該投入「塑膠」回收桶？',       options:['報紙','寶特瓶','口罩','鋁罐'],           answer:'寶特瓶',    explain:'寶特瓶（PET）屬塑膠類，記得清洗後壓扁再投入回收桶哦！' },
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「一般垃圾」？',              options:['玻璃瓶','鋁罐','用過的衛生紙','廢紙'],    answer:'用過的衛生紙',explain:'用過的衛生紙已受污染，屬一般垃圾，不可以放入紙類回收喔！' },
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪項屬於「廚餘」？',                  options:['口罩','鋁箔包','香蕉皮','塑膠袋'],         answer:'香蕉皮',    explain:'香蕉皮等食物殘渣屬廚餘，可以進行堆肥或廚餘處理，愛護環境！' },
+    { cat:'recycling', tag:'垃圾分類', q:'玻璃瓶應該投入哪個回收桶？',              options:['金屬','一般垃圾','塑膠','玻璃'],           answer:'玻璃',      explain:'玻璃瓶屬玻璃類回收，投入時要小心輕放，避免破裂受傷！' },
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪個可以投入「紙類」回收桶？',        options:['用過的衛生紙','鋁箔包','口罩','乾淨的報紙'], answer:'乾淨的報紙', explain:'只有乾淨、未受污染的紙才能回收，如報紙、書本、紙箱等。' },
+    { cat:'recycling', tag:'垃圾分類', q:'鋁罐屬於哪一類回收？',                    options:['塑膠','玻璃','金屬','紙類'],               answer:'金屬',      explain:'鋁罐和鐵罐都屬金屬類，清洗後投入金屬回收桶即可！' },
+    { cat:'recycling', tag:'垃圾分類', q:'鋁箔包（如果汁盒）應如何處理？',          options:['紙類回收','塑膠回收','一般垃圾','廚餘'],   answer:'一般垃圾',  explain:'鋁箔包是紙、鋁箔、塑膠的複合材質，無法分離，屬一般垃圾。' },
+    { cat:'recycling', tag:'垃圾分類', q:'用過的口罩應該投入哪裡？',                options:['廚餘','塑膠回收','紙類回收','一般垃圾'],   answer:'一般垃圾',  explain:'用過的口罩有污染疑慮，必須投入一般垃圾，不可放入回收桶！' },
+    { cat:'recycling', tag:'垃圾分類', q:'紙箱回收前應該怎麼處理？',                options:['直接投入一般垃圾','壓扁後投入紙類回收','投入塑膠回收','剪碎後丟廚餘'], answer:'壓扁後投入紙類回收', explain:'紙箱壓扁可以節省空間，讓更多人可以投入回收桶，環保又方便！' },
+    { cat:'recycling', tag:'垃圾分類', q:'玻璃杯破掉了，應該如何處理？',            options:['直接投入玻璃回收桶','用紙包好再投入玻璃回收','投入一般垃圾','丟廚餘'], answer:'用紙包好再投入玻璃回收', explain:'破裂的玻璃要先用報紙或厚紙包好，避免傷到別人，再投入玻璃回收！' },
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「金屬」類回收？',            options:['玻璃罐','寶特瓶','鐵罐','紙盒'],           answer:'鐵罐',      explain:'鐵罐、鋁罐都是金屬類，清洗後壓扁投入金屬回收桶！' },
+    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「廚餘」？',                  options:['口罩','免洗筷','菜葉','塑膠袋'],           answer:'菜葉',      explain:'菜葉、果皮、剩飯剩菜等食物殘渣都是廚餘，要和一般垃圾分開！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'架房小洗和大洗的第一步都是什麼？',                          options:['刷馬桶','噴清潔劑','放三角立牌','夾擦手紙'],                                      answer:'放三角立牌',             explain:'第一步一定是放三角立牌，提醒其他人「清潔中請勿進入」，保護清掃人員安全！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'小洗步驟中，「夾」指的是夾什麼？',                          options:['夾走垃圾桶','夾走架房的擦手紙和衛生紙','夾走掃具','夾走馬桶刷'],                answer:'夾走架房的擦手紙和衛生紙', explain:'「夾」是用夾子取走架房內用完的擦手紙和衛生紙，而且夾之前和夾之後都要噴次氯酸水消毒！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'擦拭馬桶坐墊（皮膚接觸面）應使用哪種顏色的布？',            options:['咖啡色布','藍色布','綠色魚鱗布','黃色海綿'],                                       answer:'藍色布',                 explain:'藍色布專用於擦馬桶座（皮膚接觸面）；咖啡色布擦馬桶外部和牆面。分色使用是避免交叉污染的重要習慣！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'刷洗手台時，洗手台的鏡面要用哪種工具擦拭？',                options:['咖啡色抹布','藍色海綿','魚鱗布（清水輾乾）','衛生紙'],                            answer:'魚鱗布（清水輾乾）',      explain:'鏡面要用魚鱗布，以清水輾乾後直接擦拭，才能擦出光亮不留水痕！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'刷馬桶時，蹲式馬桶要特別加強刷哪些地方？',                  options:['馬桶外側邊緣','水泥縫和出水孔','沖水鈕','排水孔蓋'],                             answer:'水泥縫和出水孔',          explain:'蹲式馬桶的水泥縫和出水孔最容易藏汙，要特別加強刷！坐式馬桶則要加強刷出水孔。' },
+    { cat:'cleaning',  tag:'架房清潔', q:'大洗「刮水」的正確方向是什麼？',                            options:['由外而內、由下而上','由內而外、由上而下','隨意刮都可以','只刮走道不刮架房內'],   answer:'由內而外、由上而下',       explain:'刮水要由內而外、由上而下，不會把刮過的地方再弄濕。架房內用小刮刀，外側地板用中大刮刀！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'大洗「潑清潔劑」的稀釋比例是多少？',                        options:['一瓶蓋清潔劑兌一桶水','半瓶清潔劑加半桶水','原液直接潑不加水','一匙清潔劑兌三桶水'], answer:'一瓶蓋清潔劑兌一桶水',  explain:'大洗潑清潔劑的比例是一瓶蓋清潔劑兌一桶水。先潑馬桶，再潑地板，可以用好神拖桶當運送泡泡車！' },
+    { cat:'cleaning',  tag:'架房清潔', q:'「消」這個步驟，咖啡色布要一網打盡地擦哪些地方？',          options:['只擦馬桶坐墊','只擦地板','門把、門鎖等所有接觸面','只擦洗手台'],                answer:'門把、門鎖等所有接觸面',  explain:'「消」要用咖啡色布一網打盡所有高接觸面，包含門把、門鎖！大洗還要加擦衛生紙盒、酒精盒、扶把等。' },
+  ];
+
+  const DEFAULT_SORTING = [
+    { name:'報紙',   emoji:'📰', bin:'紙類',    hint:'乾淨的報紙、雜誌都可以回收' },
+    { name:'寶特瓶', emoji:'🧴', bin:'塑膠',    hint:'壓扁瓶身後投入塑膠回收' },
+    { name:'鋁罐',   emoji:'🥤', bin:'金屬',    hint:'鋁罐清洗後投入金屬回收' },
+    { name:'香蕉皮', emoji:'🍌', bin:'廚餘',    hint:'水果皮、果核都屬廚餘' },
+    { name:'塑膠袋', emoji:'🛍️', bin:'塑膠',    hint:'洗乾淨的塑膠袋可以回收' },
+    { name:'紙箱',   emoji:'📦', bin:'紙類',    hint:'紙箱壓扁後投入紙類回收' },
+    { name:'鐵罐',   emoji:'🥫', bin:'金屬',    hint:'鐵罐清洗後投入金屬回收' },
+    { name:'蘋果核', emoji:'🍎', bin:'廚餘',    hint:'果核、果皮都是廚餘' },
+    { name:'衛生紙', emoji:'🧻', bin:'一般垃圾', hint:'用過的衛生紙屬一般垃圾' },
+    { name:'玻璃瓶', emoji:'🍾', bin:'玻璃',    hint:'玻璃瓶請小心輕放投入' },
+    { name:'廢紙',   emoji:'📄', bin:'紙類',    hint:'乾淨的廢紙、作業紙可回收' },
+    { name:'便當盒', emoji:'🥡', bin:'塑膠',    hint:'清洗乾淨的塑膠便當盒可回收' },
+    { name:'口罩',   emoji:'😷', bin:'一般垃圾', hint:'用過的口罩屬一般垃圾' },
+    { name:'菜渣',   emoji:'🥬', bin:'廚餘',    hint:'蔬菜殘渣、葉子都是廚餘' },
+    { name:'玻璃杯', emoji:'🥛', bin:'玻璃',    hint:'玻璃杯屬玻璃類回收' },
+    { name:'書本',   emoji:'📚', bin:'紙類',    hint:'舊書、雜誌都可以回收' },
+    { name:'鋁箔包', emoji:'🧃', bin:'一般垃圾', hint:'複合材質不易分解，屬一般垃圾' },
+    { name:'免洗筷', emoji:'🥢', bin:'一般垃圾', hint:'用過的免洗筷屬一般垃圾' },
+  ];
+
+  /* ── 清潔步驟預設資料 ── */
+  const DEFAULT_STEPS = {
+    small: [
+      { id:1, icon:'🪧', title:'放', desc:'放三角立牌：清潔中請勿進入，保護清掃人員安全',                                tools:'三角立牌' },
+      { id:2, icon:'🧻', title:'夾', desc:'夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                      tools:'次氯酸水' },
+      { id:3, icon:'💦', title:'噴', desc:'多功能清潔劑噴入馬桶內及內側，讓清潔劑先發揮作用',                            tools:'多功能清潔劑' },
+      { id:4, icon:'🪥', title:'刷', desc:'馬桶刷刷洗馬桶；坐式加強出水孔、蹲式加強水泥縫和出水孔',                      tools:'馬桶刷' },
+      { id:5, icon:'🧽', title:'洗', desc:'噴多功能清潔劑；邊角刷刷縫隙、綠色海綿刷檯面、咖啡布擦乾、魚鱗布擦鏡',        tools:'邊角刷、綠色海綿、咖啡布、魚鱗布' },
+      { id:6, icon:'🧴', title:'擦', desc:'藍色布噴次氯酸水擦馬桶座（皮膚接觸面）；咖啡布擦馬桶外部和牆面',              tools:'次氯酸水、藍色布、咖啡布' },
+      { id:7, icon:'🔑', title:'消', desc:'咖啡布一網打盡：擦門把、門鎖等所有接觸面',                                    tools:'次氯酸水、咖啡布' },
+      { id:8, icon:'📦', title:'補', desc:'補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                            tools:'酒精、洗手乳、擦手紙' },
+      { id:9, icon:'🧹', title:'歸', desc:'好神拖加稀釋次氯酸水擦乾地板；所有工具清潔後整理歸位',                        tools:'好神拖、次氯酸水' },
+    ],
+    big: [
+      { id:1,  icon:'🪧', title:'放', desc:'放三角立牌：清潔中請勿進入，保護清掃人員安全',                                tools:'三角立牌' },
+      { id:2,  icon:'🧻', title:'夾', desc:'夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                      tools:'次氯酸水' },
+      { id:3,  icon:'🪣', title:'潑', desc:'一瓶蓋清潔劑兌一桶水；先潑馬桶再潑地板，可用好神拖桶運送',                    tools:'多功能清潔劑、好神拖桶' },
+      { id:4,  icon:'🪥', title:'刷', desc:'刷馬桶內外；大洗加刷：馬桶座墊、架房地板、走道、水溝和水溝蓋',               tools:'馬桶刷、邊角刷' },
+      { id:5,  icon:'🧽', title:'洗', desc:'邊角刷刷縫隙、綠色海綿刷洗手台檯面、咖啡布擦乾、魚鱗布擦鏡',                 tools:'邊角刷、綠色海綿、咖啡布、魚鱗布' },
+      { id:6,  icon:'🚿', title:'沖', desc:'沖水沖走清潔劑和汙垢；水不要太多，避免濺濕牆面和感應器',                      tools:'水管' },
+      { id:7,  icon:'🔰', title:'刮', desc:'由內而外、由上而下刮水；架房內用小刮刀，外側地板用中大刮刀',                  tools:'小刮刀、中大刮刀' },
+      { id:8,  icon:'🧺', title:'擦', desc:'海綿拖把拖地；藍色布擦馬桶座；咖啡布擦馬桶外部和牆面',                        tools:'海綿拖把、藍色布、咖啡布' },
+      { id:9,  icon:'🔑', title:'消', desc:'咖啡布擦門把；次氯酸水擦衛生紙盒、酒精盒、扶把等架房內所有物品架',            tools:'次氯酸水、咖啡布' },
+      { id:10, icon:'📦', title:'補', desc:'補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                            tools:'酒精、洗手乳、擦手紙' },
+      { id:11, icon:'🧹', title:'歸', desc:'好神拖擦乾地板；所有工具清潔整理後歸回物料間',                                tools:'好神拖' },
+    ],
+  };
+
+  /* ── 儲存 Key ── */
+  const KEYS = {
+    quiz:     'ctcm_quiz_custom',
+    sorting:  'ctcm_sorting_custom',
+    steps:    'ctcm_steps_custom',
+    password: 'ctcm_admin_password',
+  };
+
+  const DEFAULT_PASSWORD = 'ctcm2026';
+
+  /* ── 工作資料 ── */
+  const data = { quiz: [], sorting: [], steps: { small: [], big: [] } };
+  let editState = null; // { type, index, mode? }
+  let currentTab = 'quiz';
+
+  /* ── 登入 / 登出 ── */
+  function doLogin() {
+    const input  = document.getElementById('pw-input').value;
+    const stored = localStorage.getItem(KEYS.password) || DEFAULT_PASSWORD;
+    if (input === stored) {
+      document.getElementById('login-error').textContent = '';
+      showScreen('admin');
+      loadData();
+    } else {
+      document.getElementById('login-error').textContent = '密碼錯誤，請再試一次';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  function doLogout() {
+    document.getElementById('pw-input').value = '';
+    showScreen('login');
+  }
+
+  /* ── 資料讀取 ── */
+  function loadData() {
+    const cq = localStorage.getItem(KEYS.quiz);
+    data.quiz = cq ? JSON.parse(cq) : [...DEFAULT_QUIZ.map(q => ({...q, options: [...q.options]}))];
+
+    const cs = localStorage.getItem(KEYS.sorting);
+    data.sorting = cs ? JSON.parse(cs) : [...DEFAULT_SORTING.map(i => ({...i}))];
+
+    const cst = localStorage.getItem(KEYS.steps);
+    data.steps = cst ? JSON.parse(cst) : {
+      small: DEFAULT_STEPS.small.map(s => ({...s})),
+      big:   DEFAULT_STEPS.big.map(s => ({...s})),
+    };
+
+    renderAll();
+  }
+
+  /* ── 資料儲存 ── */
+  function persistData(type) {
+    localStorage.setItem(KEYS[type], JSON.stringify(data[type]));
+  }
+
+  /* ── 重置預設 ── */
+  function resetToDefault(type) {
+    const labels = { quiz:'答題題目', sorting:'垃圾分類物品', steps:'清潔步驟' };
+    if (!confirm(`確定要重置「${labels[type]}」為預設資料嗎？\n所有修改都會消失，無法復原！`)) return;
+    localStorage.removeItem(KEYS[type]);
+    if (type === 'quiz')    data.quiz    = DEFAULT_QUIZ.map(q => ({...q, options: [...q.options]}));
+    if (type === 'sorting') data.sorting = DEFAULT_SORTING.map(i => ({...i}));
+    if (type === 'steps')   data.steps   = { small: DEFAULT_STEPS.small.map(s=>({...s})), big: DEFAULT_STEPS.big.map(s=>({...s})) };
+    renderAll();
+    showToast('已重置為預設資料');
+  }
+
+  /* ── 清除全部 ── */
+  function clearAllData() {
+    if (!confirm('確定要清除所有自訂資料嗎？遊戲將回到預設題目，此操作無法復原！')) return;
+    localStorage.removeItem(KEYS.quiz);
+    localStorage.removeItem(KEYS.sorting);
+    localStorage.removeItem(KEYS.steps);
+    loadData();
+    showToast('已清除所有自訂資料');
+  }
+
+  /* ── 渲染列表 ── */
+  function renderAll() {
+    renderQuizList();
+    renderSortingList();
+    renderStepsList();
+  }
+
+  function renderQuizList() {
+    document.getElementById('quiz-count').textContent = `共 ${data.quiz.length} 題`;
+    const list = document.getElementById('quiz-list');
+
+    if (!data.quiz.length) {
+      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有題目，點上方「新增題目」開始！</div>';
+      return;
+    }
+
+    list.innerHTML = data.quiz.map((q, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span class="tag ${q.cat === 'recycling' ? 'tag-green' : 'tag-blue'}">${q.tag}</span>
+          <span class="item-q">${q.q}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('quiz',${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('quiz',${i})">刪除</button>
+          </div>
+        </div>
+        <div class="item-meta">正確答案：${q.answer}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderSortingList() {
+    document.getElementById('sorting-count').textContent = `共 ${data.sorting.length} 項`;
+    const list = document.getElementById('sorting-list');
+
+    if (!data.sorting.length) {
+      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有物品，點上方「新增物品」開始！</div>';
+      return;
+    }
+
+    list.innerHTML = data.sorting.map((item, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span style="font-size:1.6rem;flex-shrink:0">${item.emoji}</span>
+          <span class="item-q">${item.name}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('sorting',${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('sorting',${i})">刪除</button>
+          </div>
+        </div>
+        <div class="item-meta">類別：${item.bin}　提示：${item.hint}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ── 清潔步驟列表渲染 ── */
+  function renderStepsList() {
+    renderStepSection('small', '🚿 架房小洗', 'steps-small-list');
+    renderStepSection('big',   '🪣 架房大洗', 'steps-big-list');
+  }
+
+  function renderStepSection(mode, label, listId) {
+    const steps = data.steps[mode];
+    const el    = document.getElementById(listId);
+    if (!el) return;
+    el.innerHTML = steps.map((s, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span style="font-size:1.6rem;flex-shrink:0">${s.icon}</span>
+          <span class="item-q">${s.id}. ${s.title}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('steps',${i},'${mode}')">編輯</button>
+          </div>
+        </div>
+        <div class="item-meta">說明：${s.desc}　工具：${s.tools}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ── 刪除 ── */
+  function deleteItem(type, index) {
+    const label = type === 'quiz'
+      ? `題目「${data.quiz[index].q.substring(0, 25)}…」`
+      : `物品「${data.sorting[index].name}」`;
+    if (!confirm(`確定要刪除這個${label}嗎？`)) return;
+    data[type].splice(index, 1);
+    persistData(type);
+    type === 'quiz' ? renderQuizList() : renderSortingList();
+    showToast('刪除成功');
+  }
+
+  /* ── 開啟表單 ── */
+  function openForm(type, index, mode) {
+    editState = { type, index, mode: mode || null };
+    const isEdit = index !== null;
+
+    document.getElementById('form-title').textContent =
+      type === 'quiz'    ? (isEdit ? '編輯題目' : '新增題目')
+    : type === 'sorting' ? (isEdit ? '編輯物品' : '新增物品')
+    :                       '編輯步驟';
+
+    ['quiz-form','sorting-form','steps-form'].forEach(id =>
+      document.getElementById(id).classList.add('hidden')
+    );
+
+    if (type === 'quiz') {
+      document.getElementById('quiz-form').classList.remove('hidden');
+      const q = isEdit ? data.quiz[index] : null;
+      document.getElementById('f-cat').value     = q ? q.cat         : 'recycling';
+      document.getElementById('f-q').value       = q ? q.q           : '';
+      document.getElementById('f-opt-a').value   = q ? (q.options[0]||'') : '';
+      document.getElementById('f-opt-b').value   = q ? (q.options[1]||'') : '';
+      document.getElementById('f-opt-c').value   = q ? (q.options[2]||'') : '';
+      document.getElementById('f-opt-d').value   = q ? (q.options[3]||'') : '';
+      document.getElementById('f-explain').value = q ? q.explain      : '';
+      if (q) {
+        const idx = q.options.indexOf(q.answer);
+        document.getElementById('f-correct').value = 'ABCD'[idx] || 'A';
+      } else {
+        document.getElementById('f-correct').value = 'A';
+      }
+    } else if (type === 'sorting') {
+      document.getElementById('sorting-form').classList.remove('hidden');
+      const item = isEdit ? data.sorting[index] : null;
+      document.getElementById('f-name').value  = item ? item.name  : '';
+      document.getElementById('f-emoji').value = item ? item.emoji : '';
+      document.getElementById('f-bin').value   = item ? item.bin   : '一般垃圾';
+      document.getElementById('f-hint').value  = item ? item.hint  : '';
+    } else if (type === 'steps') {
+      document.getElementById('steps-form').classList.remove('hidden');
+      const step = data.steps[mode][index];
+      document.getElementById('f-step-icon').value  = step.icon;
+      document.getElementById('f-step-title').value = step.title;
+      document.getElementById('f-step-desc').value  = step.desc;
+      document.getElementById('f-step-tools').value = step.tools;
+    }
+
+    document.getElementById('form-overlay').classList.remove('hidden');
+  }
+
+  /* ── 關閉表單 ── */
+  function closeForm() {
+    document.getElementById('form-overlay').classList.add('hidden');
+    editState = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('form-overlay')) closeForm();
+  }
+
+  /* ── 儲存表單 ── */
+  function saveForm() {
+    const { type, index, mode } = editState;
+    const isEdit = index !== null;
+
+    if (type === 'quiz') {
+      const cat     = document.getElementById('f-cat').value;
+      const q       = document.getElementById('f-q').value.trim();
+      const opts    = ['a','b','c','d'].map(x => document.getElementById(`f-opt-${x}`).value.trim());
+      const cidx    = 'ABCD'.indexOf(document.getElementById('f-correct').value);
+      const explain = document.getElementById('f-explain').value.trim();
+
+      if (!q || opts.some(o => !o) || !explain) {
+        alert('請填寫所有欄位！');
+        return;
+      }
+
+      const item = { cat, tag: cat === 'recycling' ? '垃圾分類' : '架房清潔',
+                     q, options: opts, answer: opts[cidx], explain };
+      if (isEdit) data.quiz[index] = item;
+      else data.quiz.push(item);
+
+      persistData('quiz');
+      renderQuizList();
+
+    } else if (type === 'sorting') {
+      const name  = document.getElementById('f-name').value.trim();
+      const emoji = document.getElementById('f-emoji').value.trim();
+      const bin   = document.getElementById('f-bin').value;
+      const hint  = document.getElementById('f-hint').value.trim();
+
+      if (!name || !emoji || !hint) {
+        alert('請填寫所有欄位！');
+        return;
+      }
+
+      const item = { name, emoji, bin, hint };
+      if (isEdit) data.sorting[index] = item;
+      else data.sorting.push(item);
+
+      persistData('sorting');
+      renderSortingList();
+
+    } else if (type === 'steps') {
+      const { mode } = editState;
+      const icon  = document.getElementById('f-step-icon').value.trim();
+      const title = document.getElementById('f-step-title').value.trim();
+      const desc  = document.getElementById('f-step-desc').value.trim();
+      const tools = document.getElementById('f-step-tools').value.trim();
+
+      if (!title || !desc) {
+        alert('大標和說明為必填！');
+        return;
+      }
+
+      data.steps[mode][index] = { ...data.steps[mode][index], icon, title, desc, tools };
+      persistData('steps');
+      renderStepsList();
+    }
+
+    closeForm();
+    showToast('儲存成功！');
+  }
+
+  /* ── 切換 Tab ── */
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.getElementById(`tab-${tab}`).classList.remove('hidden');
+    if (tab === 'settings') loadScriptUrlField();
+  }
+
+  /* ── 修改密碼 ── */
+  function changePassword() {
+    const cur     = document.getElementById('pw-current').value;
+    const nw      = document.getElementById('pw-new').value;
+    const confirm = document.getElementById('pw-confirm').value;
+    const stored  = localStorage.getItem(KEYS.password) || DEFAULT_PASSWORD;
+
+    if (cur !== stored)  { alert('目前密碼錯誤！'); return; }
+    if (!nw)             { alert('新密碼不能為空！'); return; }
+    if (nw !== confirm)  { alert('兩次輸入的密碼不一致！'); return; }
+
+    localStorage.setItem(KEYS.password, nw);
+    ['pw-current','pw-new','pw-confirm'].forEach(id => { document.getElementById(id).value = ''; });
+    showToast('密碼已更新！');
+  }
+
+  /* ── 工具 ── */
+  function showScreen(name) {
+    document.querySelectorAll('.screen,[id^=screen-]').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`screen-${name}`).classList.remove('hidden');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.add('hidden'), 2500);
+  }
+
+  /* ── Google Sheets 串接 ── */
+
+  const SCRIPT_URL_KEY = 'ctcm_apps_script_url';
+  const LAST_SYNC_KEY  = 'ctcm_last_sync';
+
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuz80_jqKX0JBqFW6No-pAGnEfikbfaU9-oq_z892HernsfM2pTqZJB_x2yLq49eF8/exec';
+
+  function loadScriptUrlField() {
+    const url = localStorage.getItem(SCRIPT_URL_KEY) || DEFAULT_SCRIPT_URL;
+    document.getElementById('script-url').value = url;
+    updateSyncStatus();
+  }
+
+  function saveScriptUrl() {
+    const url = document.getElementById('script-url').value.trim();
+    localStorage.setItem(SCRIPT_URL_KEY, url);
+    showToast('網址已儲存！');
+    updateSyncStatus();
+  }
+
+  function updateSyncStatus() {
+    const ts = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0');
+    const el = document.getElementById('sync-status');
+    if (!ts) { el.textContent = '尚未同步過'; return; }
+    const d = new Date(ts);
+    el.textContent = '上次同步：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+  }
+
+  async function manualSync() {
+    const url = localStorage.getItem(SCRIPT_URL_KEY) || '';
+    if (!url) { alert('請先填入 Apps Script 網址！'); return; }
+
+    const btn = document.getElementById('btn-sync');
+    const status = document.getElementById('sync-status');
+    btn.disabled = true;
+    btn.textContent = '同步中…';
+    status.textContent = '';
+
+    try {
+      const res  = await fetch(url);
+      const json = await res.json();
+
+      if (json.error) throw new Error(json.error);
+
+      if (json.quiz    && json.quiz.length)    { localStorage.setItem('ctcm_quiz_custom',    JSON.stringify(json.quiz));    data.quiz    = json.quiz;    renderQuizList(); }
+      if (json.sorting && json.sorting.length) { localStorage.setItem('ctcm_sorting_custom', JSON.stringify(json.sorting)); data.sorting = json.sorting; renderSortingList(); }
+      if (json.steps   && (json.steps.small || json.steps.big)) {
+        const merged = {
+          small: (json.steps.small || data.steps.small),
+          big:   (json.steps.big   || data.steps.big),
+        };
+        localStorage.setItem('ctcm_steps_custom', JSON.stringify(merged));
+        data.steps = merged;
+        renderStepsList();
+      }
+
+      localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
+      showToast('✓ 同步成功！');
+      updateSyncStatus();
+
+    } catch (err) {
+      alert('同步失敗：' + err.message + '\n請確認網址是否正確，以及 Apps Script 是否已部署。');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔄 立即同步';
+    }
+  }
+
+  /* ── 初始化 ── */
+  document.getElementById('pw-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+  </script>
+
+</body>
+</html>
