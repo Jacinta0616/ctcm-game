@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>枯草菌操作模擬器 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 步驟進度 ── */
+    .step-track {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--green-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      transition: all 0.3s;
+    }
+    .step-dot.active  { background: #ab47bc; color: white; transform: scale(1.2); }
+    .step-dot.done    { background: var(--green-mid); color: white; }
+
+    /* ── 步驟卡 ── */
+    .step-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      border: 3px solid var(--green-light);
+      padding: 2rem 1.8rem 1.6rem;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 1.4rem;
+    }
+    .step-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ab47bc, #6a1b9a);
+      color: white;
+      border-radius: 999px;
+      padding: 0.3rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    .step-emoji {
+      font-size: 4.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      animation: iconWiggle 2.5s ease-in-out infinite;
+    }
+    .step-title {
+      font-size: clamp(1.3rem, 3.5vw, 1.7rem);
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 0.5rem;
+    }
+    .step-question {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── 選項按鈕 ── */
+    .choices-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      max-width: 580px;
+      margin: 0 auto;
+    }
+    .choice-btn {
+      background: white;
+      border: 3px solid var(--green-light);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.4rem;
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.5;
+      transition: all 0.2s;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: #ab47bc;
+      background: #f9f0ff;
+      transform: translateX(4px);
+    }
+    .choice-btn.correct {
+      border-color: #43a047;
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+    .choice-btn.wrong {
+      border-color: #e53935;
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    /* ── 解說 ── */
+    .explain-box {
+      background: var(--yellow);
+      border-left: 5px solid #fbc02d;
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 580px;
+      margin: 1rem auto 0;
+      display: none;
+      animation: fadeInUp 0.35s ease;
+    }
+    .explain-box.visible { display: block; }
+
+    /* ── 錯誤警示 ── */
+    .warning-box {
+      background: #fff3e0;
+      border-left: 5px solid #ff9800;
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 580px;
+      margin: 0.8rem auto 0;
+      display: none;
+      animation: shake 0.4s ease;
+    }
+    .warning-box.visible { display: block; }
+
+    /* ── 操作總結（完成時）── */
+    .summary-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      border: 3px solid var(--green-mid);
+      padding: 1.8rem;
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
+    }
+    .summary-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .summary-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--green-light);
+    }
+    .summary-item:last-child { border-bottom: none; }
+    .summary-num {
+      background: var(--green-mid);
+      color: white;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+    .summary-text {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .summary-key {
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:3%;font-size:1.6rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:20%;right:4%;font-size:2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="bottom:15%;left:2%;font-size:1.3rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:25%;right:5%;font-size:1.8rem;animation-delay:2s">🍀</span>
+  </div>
+
+  <div class="container">
+
+    <header class="game-nav">
+      <a href="../../themes/bio.html" class="btn-back">← 返回</a>
+      <span class="game-title-bar">🧪 枯草菌操作模擬器</span>
+      <div class="score-board">⭐ <span id="score">0</span></div>
+    </header>
+
+    <div id="game-area"></div>
+
+  </div>
+
+  <script>
+  // ────────────────────────────────
+  //  5 個操作步驟，每步一個選擇題
+  // ────────────────────────────────
+  const steps = [
+    {
+      badge: '步驟 1 / 5',
+      emoji: '⚗️',
+      title: '準備枯草菌液',
+      question: '枯草菌粉末加水稀釋時，正確的稀釋比例是多少？',
+      choices: [
+        { text: '1:10（1 份菌粉 + 10 份水）', correct: false, warn: '⚠️ 濃度太高了！1:10 會造成浪費，而且不一定效果更好。正確比例是 1:40。' },
+        { text: '1:40（1 份菌粉 + 40 份水）', correct: true },
+        { text: '1:100（1 份菌粉 + 100 份水）', correct: false, warn: '⚠️ 太稀了！1:100 菌種濃度不夠，效果會大打折扣。正確比例是 1:40。' }
+      ],
+      explain: '✅ 正確！枯草菌稀釋比例為 **1:40**（一份菌粉加四十份水）。稀釋後需靜置讓菌種活化，才能發揮最好的除臭效果。'
+    },
+    {
+      badge: '步驟 2 / 5',
+      emoji: '⏰',
+      title: '等待醒菌',
+      question: '加水稀釋後，需要靜置多久讓菌種「活化」，才能使用？',
+      choices: [
+        { text: '1 小時', correct: false, warn: '⚠️ 時間不夠！1 小時菌種還沒充分活化，效果很有限。需要靜置 12 小時。' },
+        { text: '6 小時', correct: false, warn: '⚠️ 差一點！6 小時的活化程度不足。標準是靜置 **12 小時**，讓菌種充分醒來。' },
+        { text: '12 小時', correct: true }
+      ],
+      explain: '✅ 正確！枯草菌液加水後需靜置 **12 小時**，讓菌種充分活化（俗稱「醒菌」）。可以前一天晚上準備好，隔天使用。'
+    },
+    {
+      badge: '步驟 3 / 5',
+      emoji: '🕐',
+      title: '選擇使用時機',
+      question: '什麼時候最適合把枯草菌液倒入排水孔？',
+      choices: [
+        { text: '義工早上上線前', correct: false, warn: '⚠️ 上線前倒，義工打掃時的清水會把菌種沖走，效果大打折扣。' },
+        { text: '義工用餐休息時', correct: false, warn: '⚠️ 用餐後還有清潔工作，管道會繼續進水沖刷，菌種還是容易被稀釋。' },
+        { text: '義工下線前（打掃收尾階段）', correct: true }
+      ],
+      explain: '✅ 正確！在義工**下線前**使用枯草菌，之後不會再有清水進入管道，菌種可以在靜止的環境中充分作用，效果最好。'
+    },
+    {
+      badge: '步驟 4 / 5',
+      emoji: '💧',
+      title: '倒入用量',
+      question: '每一個地漏或排水孔，要倒入多少枯草菌液？',
+      choices: [
+        { text: '100cc（大約半紙杯）', correct: false, warn: '⚠️ 量太少！100cc 不夠讓菌種進入管道深處，建議每孔倒入 500cc。' },
+        { text: '500cc（大約一大杯）', correct: true },
+        { text: '1000cc（一整瓶礦泉水）', correct: false, warn: '⚠️ 量太多了！1000cc 不僅浪費，也不會有更好的效果。標準用量是每孔 500cc。' }
+      ],
+      explain: '✅ 正確！每個孔洞（地漏、排水管口）倒入 **500cc** 枯草菌液，讓菌種能充分進入管道內壁。'
+    },
+    {
+      badge: '步驟 5 / 5',
+      emoji: '🐜',
+      title: '用後注意事項',
+      question: '枯草菌粉末有甜味，使用後要特別注意什麼？',
+      choices: [
+        { text: '馬上在旁邊噴防蟑蟻噴劑', correct: false, warn: '⚠️ 不建議！立刻噴殺蟲劑可能會影響剛倒入的枯草菌，讓菌種失活。應確認附近沒有螞蟻，而非噴藥。' },
+        { text: '確認周遭沒有螞蟻聚集', correct: true },
+        { text: '立刻用大量清水沖洗', correct: false, warn: '⚠️ 千萬別沖水！大量清水會把剛倒入的枯草菌全部沖走，等於白做了。' }
+      ],
+      explain: '✅ 正確！枯草菌粉有天然甜味，操作完後要**確認附近沒有螞蟻聚集**。若有螞蟻，先清除再使用，避免甜味吸引螞蟻進入廁所。'
+    }
+  ];
+
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  function render() {
+    const area = document.getElementById('game-area');
+
+    if (current >= steps.length) {
+      const maxScore = steps.length;
+      area.innerHTML = `
+        <div class="result-screen" style="text-align:center;padding:1.5rem 1rem">
+          <span class="result-emoji">${score === maxScore ? '🏆' : score >= 3 ? '🌟' : '💪'}</span>
+          <div class="result-score">${score} / ${maxScore} 分</div>
+          <div class="result-message">
+            ${score === maxScore ? '完美操作！下次可以直接上手了！' : score >= 3 ? '掌握了大部分步驟，再練習一次！' : '建議再玩一次加深印象！'}
+          </div>
+          <div class="summary-card" style="margin-top:1.5rem">
+            <div class="summary-title">📋 枯草菌操作重點整理</div>
+            <div class="summary-item">
+              <div class="summary-num">1</div>
+              <div class="summary-text"><span class="summary-key">稀釋比例：</span>1:40（1份菌粉 + 40份水）</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-num">2</div>
+              <div class="summary-text"><span class="summary-key">靜置醒菌：</span>加水後靜置 12 小時</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-num">3</div>
+              <div class="summary-text"><span class="summary-key">使用時機：</span>義工下線前（打掃收尾階段）</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-num">4</div>
+              <div class="summary-text"><span class="summary-key">每孔用量：</span>500cc</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-num">5</div>
+              <div class="summary-text"><span class="summary-key">特別注意：</span>菌粉有甜味，確認附近無螞蟻聚集</div>
+            </div>
+          </div>
+          <button class="btn-restart" onclick="restart()">再操作一次</button>
+          <button class="btn-restart" style="background:linear-gradient(135deg,#42a5f5,#1565c0)" onclick="location.href='../../themes/bio.html'">返回主題</button>
+        </div>`;
+      return;
+    }
+
+    const s = steps[current];
+    document.getElementById('score').textContent = score;
+
+    // 步驟點
+    const dotsHtml = steps.map((_, i) => `
+      <div class="step-dot ${i < current ? 'done' : i === current ? 'active' : ''}">
+        ${i < current ? '✓' : i + 1}
+      </div>`).join('');
+
+    area.innerHTML = `
+      <div class="step-track">${dotsHtml}</div>
+
+      <div class="step-card">
+        <span class="step-badge">${s.badge}</span>
+        <span class="step-emoji">${s.emoji}</span>
+        <div class="step-title">${s.title}</div>
+        <div class="step-question">${s.question}</div>
+      </div>
+
+      <div class="choices-wrap">
+        ${s.choices.map((c, i) => `
+          <button class="choice-btn" id="choice-${i}" onclick="pick(${i})">
+            ${c.text}
+          </button>
+        `).join('')}
+      </div>
+
+      <div class="warning-box" id="warning-box"></div>
+      <div class="explain-box" id="explain-box">${s.explain}</div>
+
+      <div class="action-row" style="margin-top:1.2rem">
+        <button class="btn-submit" id="btn-next"
+          style="display:none;background:linear-gradient(135deg,#ab47bc,#6a1b9a)"
+          onclick="nextStep()">
+          ${current + 1 < steps.length ? '下一步 →' : '查看結果 →'}
+        </button>
+      </div>`;
+
+    answered = false;
+  }
+
+  function pick(i) {
+    if (answered) return;
+    const s = steps[current];
+    const choice = s.choices[i];
+
+    if (choice.correct) {
+      answered = true;
+      s.choices.forEach((c, idx) => {
+        const btn = document.getElementById(`choice-${idx}`);
+        btn.disabled = true;
+        if (c.correct) btn.classList.add('correct');
+      });
+      score++;
+      document.getElementById('score').textContent = score;
+      document.getElementById('explain-box').classList.add('visible');
+      document.getElementById('btn-next').style.display = 'inline-block';
+    } else {
+      // 答錯但不鎖定，顯示提示後讓玩家重試
+      const btn = document.getElementById(`choice-${i}`);
+      btn.classList.add('wrong');
+      setTimeout(() => btn.classList.remove('wrong'), 1000);
+
+      const warnBox = document.getElementById('warning-box');
+      warnBox.textContent = choice.warn || '⚠️ 不對喔，再想想看！';
+      warnBox.classList.add('visible');
+    }
+  }
+
+  function nextStep() {
+    current++;
+    render();
+  }
+
+  function restart() {
+    current = 0;
+    score = 0;
+    render();
+  }
+
+  render();
+  </script>
+</body>
+</html>

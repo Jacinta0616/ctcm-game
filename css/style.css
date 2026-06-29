@@ -212,14 +212,61 @@ body {
 }
 
 /* 各主題按鈕顏色 */
-.card-quiz  .btn-play { background: linear-gradient(135deg, #fbc02d, #f57f17); }
-.card-sort  .btn-play { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); }
-.card-steps .btn-play { background: linear-gradient(135deg, #42a5f5, #1565c0); }
-.card-assign .btn-play { background: linear-gradient(135deg, #ce93d8, #6a1b9a); }
+.card-quiz   .btn-play  { background: linear-gradient(135deg, #fbc02d, #f57f17); }
+.card-sort   .btn-play  { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); }
+.card-steps  .btn-play  { background: linear-gradient(135deg, #42a5f5, #1565c0); }
+.card-assign .btn-play  { background: linear-gradient(135deg, #ce93d8, #6a1b9a); }
+.card-clean  .btn-play  { background: linear-gradient(135deg, #26c6da, #00838f); }
+.card-bio    .btn-play  { background: linear-gradient(135deg, #ffb74d, #e65100); }
+.card-spot   .btn-play  { background: linear-gradient(135deg, #42a5f5, #1565c0); }
+.card-recycle-steps .btn-play { background: linear-gradient(135deg, #66bb6a, #2e7d32); }
+.card-bio-match .btn-play     { background: linear-gradient(135deg, #ffb74d, #e65100); }
+.card-bacillus .btn-play      { background: linear-gradient(135deg, #ab47bc, #6a1b9a); }
 
 /* 適才適所卡片 */
 .card-assign:hover  { border-color: #ab47bc; }
 .card-assign .card-icon { animation-delay: 2.1s; }
+
+/* 架房清潔 */
+.card-clean:hover   { border-color: #26c6da; }
+.card-clean .card-icon { animation-delay: 0.3s; }
+
+/* 生物防治 */
+.card-bio:hover     { border-color: #ffb74d; }
+.card-bio .card-icon { animation-delay: 1.1s; }
+
+/* 找找看 */
+.card-spot:hover     { border-color: #42a5f5; }
+.card-spot .card-icon { animation-delay: 0.5s; }
+
+/* 回收步驟 */
+.card-recycle-steps:hover { border-color: #66bb6a; }
+.card-recycle-steps .card-icon { animation-delay: 1.0s; }
+
+/* 生物配對 */
+.card-bio-match:hover { border-color: #ffb74d; }
+.card-bio-match .card-icon { animation-delay: 0.2s; }
+
+/* 枯草菌模擬器 */
+.card-bacillus:hover { border-color: #ab47bc; }
+.card-bacillus .card-icon { animation-delay: 1.6s; }
+
+/* ── 三欄主題格（首頁）── */
+.theme-grid {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── 主題遊戲格（主題頁，最多 2 款遊戲）── */
+.theme-game-grid {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .theme-grid { grid-template-columns: 1fr; }
+}
 
 /* ── 後台管理按鈕 ── */
 .btn-admin {

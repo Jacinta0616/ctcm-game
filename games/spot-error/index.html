@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>找找看！哪裡做錯了？| 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 關卡資訊 ── */
+    .round-info {
+      text-align: center;
+      margin-bottom: 1.2rem;
+    }
+    .round-label {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+    .round-title {
+      font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+      font-weight: 900;
+      color: var(--green-dark);
+    }
+    .round-hint {
+      font-size: 1rem;
+      color: var(--text-light);
+      margin-top: 0.3rem;
+    }
+
+    /* ── 情境卡片格 ── */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+      margin: 1.2rem 0;
+    }
+
+    /* ── 單張情境卡 ── */
+    .scenario-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      padding: 1.4rem 1.2rem 1.2rem;
+      box-shadow: var(--shadow-sm);
+      border: 3px solid var(--green-light);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      user-select: none;
+    }
+
+    .scenario-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .scenario-card.selected {
+      border-color: #e53935;
+      background: #fff5f5;
+    }
+
+    /* 揭曉後狀態 */
+    .scenario-card.reveal-error {
+      border-color: #e53935;
+      background: #ffebee;
+      cursor: default;
+      transform: none;
+    }
+    .scenario-card.reveal-ok {
+      border-color: #43a047;
+      background: #e8f5e9;
+      cursor: default;
+      transform: none;
+    }
+
+    /* ── 工具圖片 ── */
+    .tool-img-wrap {
+      width: 100%;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      background: #f5f5f5;
+    }
+    .tool-img {
+      max-width: 100%;
+      max-height: 130px;
+      object-fit: contain;
+    }
+
+    /* ── 文字區 ── */
+    .scenario-label {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      text-align: center;
+    }
+    .scenario-desc {
+      font-size: 0.95rem;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    /* ── 標記圖示（揭曉後）── */
+    .reveal-badge {
+      display: none;
+      font-size: 2rem;
+    }
+    .reveal-error .reveal-badge,
+    .reveal-ok   .reveal-badge { display: block; }
+
+    /* ── 說明文字（揭曉後）── */
+    .explain-text {
+      display: none;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      line-height: 1.5;
+      border-top: 1px solid #eee;
+      padding-top: 0.6rem;
+      margin-top: 0.3rem;
+    }
+    .reveal-error .explain-text,
+    .reveal-ok   .explain-text { display: block; }
+    .reveal-error .explain-text { color: #c62828; }
+    .reveal-ok   .explain-text  { color: #2e7d32; }
+
+    /* ── 操作按鈕 ── */
+    .action-row {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0.9rem 2.5rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover { filter: brightness(1.1); transform: scale(1.04); }
+    .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .btn-next {
+      background: linear-gradient(135deg, #42a5f5, #1565c0);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 0.9rem 2.5rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: none;
+      transition: all 0.2s;
+    }
+    .btn-next:hover { filter: brightness(1.1); transform: scale(1.04); }
+    .btn-next.visible { display: inline-block; }
+
+    /* ── 回合得分提示 ── */
+    .round-result {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 0.6rem 1.2rem;
+      border-radius: var(--radius-md);
+      display: none;
+      margin-top: 0.5rem;
+    }
+    .round-result.visible { display: block; }
+    .round-result.good { background: #e8f5e9; color: #2e7d32; }
+    .round-result.bad  { background: #fff3e0; color: #e65100; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:3%;font-size:1.6rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:20%;right:4%;font-size:2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="bottom:15%;left:2%;font-size:1.3rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:25%;right:5%;font-size:1.8rem;animation-delay:2s">🍀</span>
+  </div>
+
+  <div class="container">
+
+    <header class="game-nav">
+      <a href="../../themes/cleaning.html" class="btn-back">← 返回</a>
+      <span class="game-title-bar">🔍 找找看！哪裡做錯了？</span>
+      <div class="score-board">⭐ <span id="score">0</span></div>
+    </header>
+
+    <div id="game-area"></div>
+
+  </div>
+
+  <script>
+  // ────────────────────────────────
+  //  遊戲資料：3 關，每關 4 張情境卡
+  //  isError: true = 做錯了（需點選）
+  // ────────────────────────────────
+  const rounds = [
+    {
+      title: "打掃前準備",
+      items: [
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0007.jpg",
+          label: "三角立牌",
+          desc: "打掃前先在門口放三角立牌，提醒訪客",
+          isError: false,
+          explain: "✅ 正確！打掃前一定要先放立牌，避免訪客誤入。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0039.jpg",
+          label: "旋轉拖把",
+          desc: "直接開始用濕拖把拖地，跳過乾掃步驟",
+          isError: true,
+          explain: "❌ 錯誤！正確順序是先乾掃清除灰塵，再用濕拖把清潔地板，否則會越拖越髒。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0019.jpg",
+          label: "大掃帚",
+          desc: "先用掃帚把地面灰塵掃乾淨再濕拖",
+          isError: false,
+          explain: "✅ 正確！乾掃在前、濕拖在後是基本 SOP。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0005.jpg",
+          label: "多功能清潔劑",
+          desc: "清潔劑不稀釋，直接用原液大量噴灑",
+          isError: true,
+          explain: "❌ 錯誤！清潔劑必須按比例稀釋後使用，原液濃度過高可能傷害設備及皮膚。"
+        }
+      ]
+    },
+    {
+      title: "抹布分色使用",
+      items: [
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0021.jpg",
+          label: "藍色抹布",
+          desc: "藍色抹布：專門用來擦鏡子、玻璃、地板",
+          isError: false,
+          explain: "✅ 正確！藍色抹布有固定用途，不能隨意換區域。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0022.jpg",
+          label: "咖啡色抹布",
+          desc: "咖啡色抹布先擦桌面後，繼續拿來擦廁所",
+          isError: true,
+          explain: "❌ 錯誤！不同區域（桌面與廁所）必須使用不同抹布，避免交叉污染。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0023.jpg",
+          label: "抹布",
+          desc: "不管顏色，哪塊布順手就用哪塊",
+          isError: true,
+          explain: "❌ 錯誤！抹布分色是衛生管理的基本原則，必須按顏色區分用途，不可混用。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0014.jpg",
+          label: "馬桶刷",
+          desc: "每間廁所的馬桶刷各自獨立，不跨廁所使用",
+          isError: false,
+          explain: "✅ 正確！馬桶刷是個人衛生工具，不可跨廁所混用。"
+        }
+      ]
+    },
+    {
+      title: "清潔程序細節",
+      items: [
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0007.jpg",
+          label: "三角立牌",
+          desc: "打掃完成後，記得收回放置的三角立牌",
+          isError: false,
+          explain: "✅ 正確！打掃結束要把立牌收回，避免妨礙正常通行。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0006.jpg",
+          label: "次氯酸水",
+          desc: "次氯酸水噴完後立刻用抹布擦掉",
+          isError: true,
+          explain: "❌ 錯誤！次氯酸水需靜置數分鐘讓消毒作用充分發揮，不能噴完馬上擦掉。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0039.jpg",
+          label: "旋轉拖把",
+          desc: "拖地方向：從房間最裡面往門口方向拖",
+          isError: false,
+          explain: "✅ 正確！從裡往外拖，才不會把已拖好的地方再踩髒。"
+        },
+        {
+          img: "../../images/tools/架房打掃用具(1)_page-0009.jpg",
+          label: "水桶",
+          desc: "拖地用同一桶水，從頭拖到底不換水",
+          isError: true,
+          explain: "❌ 錯誤！拖地水髒了要換，否則越拖越髒，水桶水需要定期更換。"
+        }
+      ]
+    }
+  ];
+
+  let currentRound = 0;
+  let score = 0;
+  let selected = new Set(); // 目前選取的 index
+  let revealed = false;
+
+  function render() {
+    const area = document.getElementById('game-area');
+
+    if (currentRound >= rounds.length) {
+      // 結束畫面
+      area.innerHTML = `
+        <div class="result-screen">
+          <span class="result-emoji">${score >= 6 ? '🏆' : score >= 4 ? '🌟' : '💪'}</span>
+          <div class="result-score">${score} / ${rounds.length * 2} 分</div>
+          <div class="result-message">
+            ${score >= 6 ? '太厲害了！全部找對！' : score >= 4 ? '掌握得不錯，繼續加油！' : '再多練習，你一定可以！'}
+          </div>
+          <button class="btn-restart" onclick="restart()">再玩一次</button>
+          <button class="btn-restart" style="background:linear-gradient(135deg,#42a5f5,#1565c0)" onclick="location.href='../../themes/cleaning.html'">返回主題</button>
+        </div>`;
+      return;
+    }
+
+    const round = rounds[currentRound];
+    const errorCount = round.items.filter(i => i.isError).length;
+
+    area.innerHTML = `
+      <div class="round-info">
+        <div class="round-label">第 ${currentRound + 1} 關 / ${rounds.length}</div>
+        <div class="round-title">${round.title}</div>
+        <div class="round-hint">點選你認為「做錯了」的操作（共 ${errorCount} 個）</div>
+      </div>
+
+      <div class="scenario-grid">
+        ${round.items.map((item, i) => `
+          <div class="scenario-card" id="card-${i}" onclick="toggleCard(${i})">
+            <div class="tool-img-wrap">
+              <img class="tool-img" src="${item.img}" alt="${item.label}" loading="lazy">
+            </div>
+            <div class="scenario-label">${item.label}</div>
+            <div class="scenario-desc">${item.desc}</div>
+            <div class="reveal-badge">${item.isError ? '❌' : '✅'}</div>
+            <div class="explain-text">${item.explain}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div id="round-result" class="round-result"></div>
+
+      <div class="action-row">
+        <button class="btn-submit" id="btn-submit" onclick="submitRound()">確認答案</button>
+        <button class="btn-next" id="btn-next" onclick="nextRound()">
+          ${currentRound + 1 < rounds.length ? '下一關 →' : '查看結果 →'}
+        </button>
+      </div>`;
+
+    selected = new Set();
+    revealed = false;
+  }
+
+  function toggleCard(index) {
+    if (revealed) return;
+    if (selected.has(index)) {
+      selected.delete(index);
+      document.getElementById(`card-${index}`).classList.remove('selected');
+    } else {
+      selected.add(index);
+      document.getElementById(`card-${index}`).classList.add('selected');
+    }
+  }
+
+  function submitRound() {
+    if (revealed) return;
+    revealed = true;
+
+    const round = rounds[currentRound];
+    let roundScore = 0;
+
+    round.items.forEach((item, i) => {
+      const card = document.getElementById(`card-${i}`);
+      card.classList.remove('selected');
+      if (item.isError) {
+        card.classList.add('reveal-error');
+        if (selected.has(i)) roundScore++;
+      } else {
+        card.classList.add('reveal-ok');
+        if (selected.has(i)) roundScore--; // 誤點正確項目扣分
+      }
+    });
+
+    roundScore = Math.max(0, roundScore);
+    score += roundScore;
+    document.getElementById('score').textContent = score;
+
+    const resultEl = document.getElementById('round-result');
+    const errorCount = round.items.filter(i => i.isError).length;
+    if (roundScore === errorCount) {
+      resultEl.textContent = `太棒了！全部找到了！+${roundScore} 分`;
+      resultEl.className = 'round-result visible good';
+    } else {
+      resultEl.textContent = `找到 ${roundScore} / ${errorCount} 個，看看哪裡沒找到`;
+      resultEl.className = 'round-result visible bad';
+    }
+
+    document.getElementById('btn-submit').disabled = true;
+    document.getElementById('btn-next').classList.add('visible');
+  }
+
+  function nextRound() {
+    currentRound++;
+    render();
+  }
+
+  function restart() {
+    currentRound = 0;
+    score = 0;
+    render();
+  }
+
+  // 啟動
+  render();
+  </script>
+</body>
+</html>

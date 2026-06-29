@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回收前要先怎麼做？| 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    /* ── 進度條 ── */
+    .progress-wrap {
+      margin-bottom: 1.2rem;
+      text-align: center;
+    }
+    .progress-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 0.45rem;
+    }
+    .progress-track {
+      background: var(--green-light);
+      border-radius: 999px;
+      height: 14px;
+      overflow: hidden;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .progress-fill {
+      background: linear-gradient(90deg, var(--green-mid), var(--green-dark));
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.45s ease;
+    }
+
+    /* ── 題目卡片 ── */
+    .question-card {
+      background: white;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      border: 3px solid var(--green-light);
+      padding: 2rem 1.8rem 1.6rem;
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 1.5rem;
+    }
+    .item-emoji {
+      font-size: 5rem;
+      line-height: 1.2;
+      display: block;
+      margin-bottom: 0.5rem;
+      animation: iconWiggle 2.5s ease-in-out infinite;
+    }
+    .item-name {
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 0.4rem;
+    }
+    .question-text {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── 選項 ── */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .option-btn {
+      background: white;
+      border: 3px solid var(--green-light);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.2rem;
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      line-height: 1.5;
+      transition: all 0.2s;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--green-mid);
+      background: var(--green-bg);
+      transform: translateY(-2px);
+    }
+    .option-btn.correct {
+      border-color: #43a047;
+      background: #e8f5e9;
+      color: #1b5e20;
+    }
+    .option-btn.wrong {
+      border-color: #e53935;
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    /* ── 解說區 ── */
+    .explain-box {
+      background: var(--yellow);
+      border-left: 5px solid #fbc02d;
+      border-radius: var(--radius-sm);
+      padding: 0.9rem 1.2rem;
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 680px;
+      margin: 1rem auto 0;
+      display: none;
+      animation: fadeInUp 0.35s ease;
+    }
+    .explain-box.visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:3%;font-size:1.6rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:20%;right:4%;font-size:2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="bottom:15%;left:2%;font-size:1.3rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:25%;right:5%;font-size:1.8rem;animation-delay:2s">🍀</span>
+  </div>
+
+  <div class="container">
+
+    <header class="game-nav">
+      <a href="../../themes/recycle.html" class="btn-back">← 返回</a>
+      <span class="game-title-bar">📦 回收前要先怎麼做？</span>
+      <div class="score-board">✅ <span id="score">0</span> / <span id="total">5</span></div>
+    </header>
+
+    <div id="game-area"></div>
+
+  </div>
+
+  <script>
+  // ────────────────────────────────
+  //  5 題，單選，答完即時顯示解說
+  // ────────────────────────────────
+  const questions = [
+    {
+      emoji: "🧃",
+      name: "鋁箔包（利樂包）",
+      question: "回收鋁箔包前，需要做哪些處理？",
+      options: [
+        { text: "拔掉吸管、剪開清洗、壓扁後投入回收桶", correct: true },
+        { text: "直接整包投入回收桶，不需處理", correct: false },
+        { text: "撕掉外層紙，只留中間鋁箔再回收", correct: false },
+        { text: "加熱融化後再回收", correct: false }
+      ],
+      explain: "🔍 鋁箔包由鋁箔、聚乙烯和紙板組成，材質較複雜。回收前要：① 拔掉或剪掉吸管、② 剪開沖洗乾淨、③ 壓扁，才能讓回收廠順利處理。"
+    },
+    {
+      emoji: "🍶",
+      name: "寶特瓶（PET）",
+      question: "回收寶特瓶時，瓶蓋和瓶身需要分開投入嗎？",
+      options: [
+        { text: "不需要，瓶蓋和瓶身可以一起回收", correct: true },
+        { text: "需要，瓶蓋材質不同要分開投入", correct: false },
+        { text: "只能回收瓶身，瓶蓋要丟一般垃圾", correct: false },
+        { text: "要先把標籤撕掉才能回收", correct: false }
+      ],
+      explain: "🔍 寶特瓶（PET）的瓶蓋和瓶身可以一起回收，不需分開。清洗後壓扁即可投入回收桶。有顏色的寶特瓶也可以回收，有油脂的則歸塑膠瓶罐類。"
+    },
+    {
+      emoji: "🥫",
+      name: "鐵罐 / 鋁罐",
+      question: "下列關於鐵罐和鋁罐的回收說明，哪個正確？",
+      options: [
+        { text: "鋁罐可踩扁；噴射式鐵罐（如殺蟲劑罐）不可壓縮", correct: true },
+        { text: "所有罐子都要踩扁後才能回收", correct: false },
+        { text: "罐子不需要清洗，直接丟入回收桶即可", correct: false },
+        { text: "鐵罐要撕掉標籤，鋁罐不用", correct: false }
+      ],
+      explain: "🔍 鋁罐質軟、可踩扁。鐵罐硬度高，噴射式鐵罐（殺蟲劑、噴漆罐等）內有殘壓，壓縮可能爆炸，千萬不可壓縮！所有罐子都要清洗再投入回收。"
+    },
+    {
+      emoji: "🥡",
+      name: "免洗塑膠餐具",
+      question: "回收免洗塑膠餐盒時，下列說法哪個正確？",
+      options: [
+        { text: "清洗後可投入塑膠回收；免洗筷歸一般垃圾", correct: true },
+        { text: "免洗筷可以和塑膠餐盒一起投入回收桶", correct: false },
+        { text: "有油污直接投入塑膠回收桶，不用清洗", correct: false },
+        { text: "塑膠湯匙屬一般垃圾，不能回收", correct: false }
+      ],
+      explain: "🔍 免洗塑膠餐盒、湯碗、湯匙清洗後可投入塑膠回收。但免洗筷（木竹材質）和橡皮筋屬一般垃圾，不可放入塑膠回收。"
+    },
+    {
+      emoji: "📰",
+      name: "紙類回收",
+      question: "下列哪種情況的紙，不可以投入紙類回收桶？",
+      options: [
+        { text: "沾滿油污或水濕的廢紙", correct: true },
+        { text: "乾淨的紙箱（硬紙板）", correct: false },
+        { text: "舊報紙和雜誌", correct: false },
+        { text: "乾淨的紙袋", correct: false }
+      ],
+      explain: "🔍 紙類回收的大原則是「乾淨才能回收」。沾了油污、食物殘渣或濕掉的紙（如油紙袋、濕紙巾）要歸一般垃圾。乾淨的紙箱、報紙、紙袋、書本都可以回收。"
+    }
+  ];
+
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  function render() {
+    const area = document.getElementById('game-area');
+
+    if (current >= questions.length) {
+      area.innerHTML = `
+        <div class="result-screen">
+          <span class="result-emoji">${score === 5 ? '🏆' : score >= 3 ? '🌟' : '💪'}</span>
+          <div class="result-score">${score} / ${questions.length}</div>
+          <div class="result-message">
+            ${score === 5 ? '全對！回收達人！' : score >= 3 ? '掌握得不錯，繼續加油！' : '再看看資料，你一定可以！'}
+          </div>
+          <button class="btn-restart" onclick="restart()">再玩一次</button>
+          <button class="btn-restart" style="background:linear-gradient(135deg,#42a5f5,#1565c0)" onclick="location.href='../../themes/recycle.html'">返回主題</button>
+        </div>`;
+      return;
+    }
+
+    const q = questions[current];
+    const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+
+    document.getElementById('score').textContent = score;
+    document.getElementById('total').textContent = questions.length;
+
+    area.innerHTML = `
+      <div class="progress-wrap">
+        <div class="progress-label">第 ${current + 1} / ${questions.length} 題</div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${(current / questions.length) * 100}%"></div>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <span class="item-emoji">${q.emoji}</span>
+        <div class="item-name">${q.name}</div>
+        <div class="question-text">${q.question}</div>
+      </div>
+
+      <div class="options-grid">
+        ${shuffled.map((opt, i) => `
+          <button class="option-btn" id="opt-${i}" onclick="pick(${i}, ${opt.correct})">
+            ${opt.text}
+          </button>
+        `).join('')}
+      </div>
+
+      <div class="explain-box" id="explain-box">${q.explain}</div>
+
+      <div class="action-row" style="margin-top:1.2rem">
+        <button class="btn-submit" id="btn-next" style="display:none;background:linear-gradient(135deg,#42a5f5,#1565c0)"
+          onclick="nextQ()">
+          ${current + 1 < questions.length ? '下一題 →' : '查看結果 →'}
+        </button>
+      </div>`;
+
+    answered = false;
+  }
+
+  function pick(i, isCorrect) {
+    if (answered) return;
+    answered = true;
+
+    // 顏色反饋
+    const btns = document.querySelectorAll('.option-btn');
+    btns.forEach((btn, idx) => {
+      btn.disabled = true;
+      // 找出正確選項並標綠
+      if (btn.textContent.trim() === questions[current].options.find(o => o.correct).text) {
+        btn.classList.add('correct');
+      }
+    });
+    document.getElementById(`opt-${i}`).classList.add(isCorrect ? 'correct' : 'wrong');
+
+    if (isCorrect) {
+      score++;
+      document.getElementById('score').textContent = score;
+    }
+
+    document.getElementById('explain-box').classList.add('visible');
+    document.getElementById('btn-next').style.display = 'inline-block';
+  }
+
+  function nextQ() {
+    current++;
+    render();
+  }
+
+  function restart() {
+    current = 0;
+    score = 0;
+    render();
+  }
+
+  render();
+  </script>
+</body>
+</html>
