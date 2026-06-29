@@ -151,7 +151,8 @@
 
   <script>
   // ────────────────────────────────
-  //  三種防治工具
+  //  三種防治工具（固定）與情境題庫
+  //  情境題庫優先從後台 localStorage 讀取
   // ────────────────────────────────
   const tools = [
     {
@@ -175,9 +176,9 @@
   ];
 
   // ────────────────────────────────
-  //  6 題情境
+  //  6 題情境（預設）
   // ────────────────────────────────
-  const questions = [
+  const DEFAULT_QUESTIONS = [
     {
       emoji: '🪲',
       title: '廚房排水管出現小蛾蚋',
@@ -221,6 +222,9 @@
       explain: '🔍 積水是蛾蚋孑孓的溫床。使用**溝渠劑**倒入積水管道，殺滅幼蟲並預防孳生。'
     }
   ];
+
+  const savedBM = localStorage.getItem('ctcm_biomatch_custom');
+  const questions = savedBM ? JSON.parse(savedBM) : DEFAULT_QUESTIONS;
 
   let current = 0;
   let score = 0;

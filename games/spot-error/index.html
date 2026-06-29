@@ -210,10 +210,9 @@
 
   <script>
   // ────────────────────────────────
-  //  遊戲資料：3 關，每關 4 張情境卡
-  //  isError: true = 做錯了（需點選）
+  //  遊戲資料（優先從後台 localStorage 讀取）
   // ────────────────────────────────
-  const rounds = [
+  const DEFAULT_ROUNDS = [
     {
       title: "打掃前準備",
       items: [
@@ -314,6 +313,9 @@
       ]
     }
   ];
+
+  const saved = localStorage.getItem('ctcm_spoterror_custom');
+  const rounds = saved ? JSON.parse(saved) : DEFAULT_ROUNDS;
 
   let currentRound = 0;
   let score = 0;

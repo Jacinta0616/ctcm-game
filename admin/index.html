@@ -127,6 +127,7 @@
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
+      white-space: nowrap;
     }
     .btn-sm-del {
       background: var(--red-bg);
@@ -231,6 +232,8 @@
     }
     .tag-green { background: var(--green-bg); color: var(--green-dark); }
     .tag-blue  { background: var(--blue-bg);  color: var(--blue); }
+    .tag-red   { background: var(--red-bg);   color: var(--red); }
+    .tag-orange{ background: #fff3e0;          color: #e65100; }
 
     /* 空狀態 */
     .empty-state {
@@ -253,6 +256,55 @@
     .form-row { margin-bottom: 0.9rem; }
     .form-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.35rem; display: block; }
 
+    /* ── 找找看：關卡區塊 ── */
+    .round-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      margin-bottom: 1.2rem;
+      overflow: hidden;
+    }
+    .round-header {
+      background: var(--green-bg);
+      padding: 0.7rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--border);
+    }
+    .round-header-title { font-weight: 900; color: var(--green-dark); font-size: 1rem; }
+    .round-items { padding: 0.5rem 0.8rem; }
+    .round-items .item-card { margin-bottom: 0.5rem; }
+    .round-items .item-card:last-child { margin-bottom: 0; }
+
+    /* ── 枯草菌：選項列 ── */
+    .choice-row {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.8rem;
+      margin-bottom: 0.7rem;
+      background: #fafafa;
+    }
+    .choice-row-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .choice-row-header input[type=radio] {
+      width: auto;
+      padding: 0;
+      accent-color: var(--green);
+    }
+    .choice-warn-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.4rem;
+      display: block;
+    }
+
     /* ── 表單 overlay ── */
     .form-overlay {
       position: fixed;
@@ -270,7 +322,7 @@
       border-radius: 20px;
       padding: 2rem;
       width: 100%;
-      max-width: 560px;
+      max-width: 580px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     }
     .form-card-header {
@@ -300,7 +352,7 @@
       margin-top: 1.5rem;
       justify-content: flex-end;
     }
-    .opts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 3fr; gap: 0.6rem; }
 
     /* ── Toast ── */
     .toast {
@@ -315,15 +367,24 @@
       font-size: 0.95rem;
       font-weight: 600;
       z-index: 999;
-      animation: fadeInUp 0.3s ease;
     }
 
     /* ── 工具 ── */
     .hidden { display: none !important; }
+    .info-box {
+      background: #fff9c4;
+      border: 2px solid #fbc02d;
+      border-radius: var(--radius);
+      padding: 0.7rem 1.1rem;
+      margin-bottom: 1.2rem;
+      font-size: 0.9rem;
+      color: #f57f17;
+      line-height: 1.7;
+    }
 
     @media (max-width: 520px) {
-      .opts-grid { grid-template-columns: 1fr; }
-      .tab-btn   { padding: 0.7rem 0.8rem; font-size: 0.85rem; }
+      .tab-btn { padding: 0.7rem 0.8rem; font-size: 0.85rem; }
+      .two-col { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -345,7 +406,6 @@
   <!-- ② 管理主畫面 -->
   <div id="screen-admin" class="hidden">
 
-    <!-- 頂部導覽 -->
     <nav class="admin-nav">
       <span class="admin-nav-title">⚙️ 後台管理</span>
       <div class="admin-nav-actions">
@@ -354,25 +414,35 @@
       </div>
     </nav>
 
-    <!-- Tab 列 -->
     <div class="tab-bar">
-      <button class="tab-btn active" data-tab="quiz"     onclick="switchTab('quiz')">💡 答題題目</button>
-      <button class="tab-btn"        data-tab="sorting"  onclick="switchTab('sorting')">♻️ 垃圾分類物品</button>
-      <button class="tab-btn"        data-tab="steps"    onclick="switchTab('steps')">🧹 清潔步驟</button>
-      <button class="tab-btn"        data-tab="settings" onclick="switchTab('settings')">🔧 設定</button>
+      <button class="tab-btn active" data-tab="spoterror"    onclick="switchTab('spoterror')">🔍 找找看</button>
+      <button class="tab-btn"        data-tab="recyclesteps" onclick="switchTab('recyclesteps')">📦 回收前怎麼做</button>
+      <button class="tab-btn"        data-tab="sorting"      onclick="switchTab('sorting')">♻️ 垃圾大分類</button>
+      <button class="tab-btn"        data-tab="biomatch"     onclick="switchTab('biomatch')">🎯 配對挑戰</button>
+      <button class="tab-btn"        data-tab="bacillus"     onclick="switchTab('bacillus')">🧪 枯草菌操作</button>
+      <button class="tab-btn"        data-tab="settings"     onclick="switchTab('settings')">🔧 設定</button>
     </div>
 
-    <!-- Tab: 答題題目 -->
-    <div id="tab-quiz" class="tab-content">
+    <!-- Tab: 找找看 -->
+    <div id="tab-spoterror" class="tab-content">
       <div class="toolbar">
-        <button class="btn-primary" onclick="openForm('quiz', null)">＋ 新增題目</button>
-        <span class="count-label" id="quiz-count"></span>
-        <button class="btn-danger" onclick="resetToDefault('quiz')">↺ 重置預設</button>
+        <span class="count-label">固定 3 關 × 4 情境卡，可編輯文字和錯誤標記（圖片路徑固定）</span>
+        <button class="btn-danger" onclick="resetToDefault('spoterror')">↺ 重置預設</button>
       </div>
-      <div id="quiz-list"></div>
+      <div id="spoterror-rounds"></div>
     </div>
 
-    <!-- Tab: 垃圾分類物品 -->
+    <!-- Tab: 回收前怎麼做 -->
+    <div id="tab-recyclesteps" class="tab-content hidden">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openForm('recyclesteps', null)">＋ 新增題目</button>
+        <span class="count-label" id="recyclesteps-count"></span>
+        <button class="btn-danger" onclick="resetToDefault('recyclesteps')">↺ 重置預設</button>
+      </div>
+      <div id="recyclesteps-list"></div>
+    </div>
+
+    <!-- Tab: 垃圾大分類 -->
     <div id="tab-sorting" class="tab-content hidden">
       <div class="toolbar">
         <button class="btn-primary" onclick="openForm('sorting', null)">＋ 新增物品</button>
@@ -382,32 +452,32 @@
       <div id="sorting-list"></div>
     </div>
 
-    <!-- Tab: 清潔步驟 -->
-    <div id="tab-steps" class="tab-content hidden">
-      <div class="tab-actions">
-        <span id="steps-count" class="item-count">小洗 9 步 ／ 大洗 11 步</span>
-        <button class="btn-danger" onclick="resetToDefault('steps')">↺ 重置預設</button>
+    <!-- Tab: 配對挑戰 -->
+    <div id="tab-biomatch" class="tab-content hidden">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openForm('biomatch', null)">＋ 新增情境</button>
+        <span class="count-label" id="biomatch-count"></span>
+        <button class="btn-danger" onclick="resetToDefault('biomatch')">↺ 重置預設</button>
       </div>
+      <div id="biomatch-list"></div>
+    </div>
 
-      <div style="background:#fff9c4;border:2px solid #fbc02d;border-radius:12px;padding:0.7rem 1.1rem;margin-bottom:1.2rem;font-size:0.9rem;color:#f57f17;line-height:1.7">
-        💡 步驟順序固定，只能編輯各步驟的大標、說明與工具。
+    <!-- Tab: 枯草菌操作 -->
+    <div id="tab-bacillus" class="tab-content hidden">
+      <div class="toolbar">
+        <span class="count-label">固定 5 個操作步驟，只能編輯各步驟的內容</span>
+        <button class="btn-danger" onclick="resetToDefault('bacillus')">↺ 重置預設</button>
       </div>
-
-      <div class="section-label" style="font-weight:900;color:var(--green-dark);font-size:1.1rem;margin-bottom:0.8rem">🚿 架房小洗（9 步驟）</div>
-      <div id="steps-small-list"></div>
-
-      <div class="section-label" style="font-weight:900;color:#1565c0;font-size:1.1rem;margin:1.5rem 0 0.8rem">🪣 架房大洗（11 步驟）</div>
-      <div id="steps-big-list"></div>
+      <div id="bacillus-list"></div>
     </div>
 
     <!-- Tab: 設定 -->
     <div id="tab-settings" class="tab-content hidden">
 
-      <!-- Google Sheets 設定 -->
       <div class="settings-card">
         <h3>📊 Google Sheets 串接</h3>
         <p style="color:var(--text-light);font-size:0.95rem;margin-bottom:1.2rem;line-height:1.8">
-          設定後，遊戲題目可以從 Google 試算表自動同步。<br>
+          設定後，「垃圾大分類」題目可從 Google 試算表同步。<br>
           Apps Script 程式碼請參考 <code style="background:#f5f5f5;padding:0.1rem 0.4rem;border-radius:4px">admin/apps-script.js</code>
         </p>
         <div class="form-row">
@@ -441,60 +511,93 @@
       <div class="settings-card">
         <h3>🗑️ 清除所有自訂資料</h3>
         <p style="color:var(--text-light);font-size:0.95rem;margin-bottom:1rem;line-height:1.7">
-          清除後，所有遊戲將回到預設題目。<br>此操作無法復原，請謹慎操作。
+          清除後，所有遊戲將回到預設題目。此操作無法復原。
         </p>
         <button class="btn-danger" onclick="clearAllData()">清除全部自訂資料</button>
       </div>
     </div>
 
-  </div>
+  </div><!-- /screen-admin -->
 
-  <!-- ③ 新增／編輯 表單 overlay -->
+  <!-- ③ 表單 overlay -->
   <div id="form-overlay" class="form-overlay hidden" onclick="handleOverlayClick(event)">
     <div class="form-card" id="form-card">
       <div class="form-card-header">
-        <span class="form-card-title" id="form-title">新增題目</span>
+        <span class="form-card-title" id="form-title">編輯</span>
         <button class="btn-close" onclick="closeForm()">✕</button>
       </div>
 
-      <!-- 答題題目表單 -->
-      <div id="quiz-form">
+      <!-- 找找看：關卡標題 -->
+      <div id="spoterror-round-form" class="hidden">
         <div class="form-row">
-          <label class="form-label">主題分類</label>
-          <select id="f-cat">
-            <option value="recycling">垃圾分類</option>
-            <option value="cleaning">架房清潔</option>
-          </select>
+          <label class="form-label">關卡標題</label>
+          <input type="text" id="f-round-title" placeholder="例如：打掃前準備">
+        </div>
+      </div>
+
+      <!-- 找找看：情境卡片 -->
+      <div id="spoterror-item-form" class="hidden">
+        <div class="form-row">
+          <label class="form-label">工具 / 名稱</label>
+          <input type="text" id="f-item-label" placeholder="例如：三角立牌">
         </div>
         <div class="form-row">
-          <label class="form-label">題目內容</label>
-          <textarea id="f-q" placeholder="輸入題目…"></textarea>
+          <label class="form-label">操作描述文字</label>
+          <textarea id="f-item-desc" placeholder="描述這個情境的操作內容…"></textarea>
         </div>
         <div class="form-row">
-          <label class="form-label">四個選項</label>
-          <div class="opts-grid">
-            <input type="text" id="f-opt-a" placeholder="選項 A">
-            <input type="text" id="f-opt-b" placeholder="選項 B">
-            <input type="text" id="f-opt-c" placeholder="選項 C">
-            <input type="text" id="f-opt-d" placeholder="選項 D">
+          <label class="form-label" style="display:flex;align-items:center;gap:0.6rem;cursor:pointer">
+            <input type="checkbox" id="f-item-iserror" style="width:auto;padding:0;margin:0;accent-color:var(--red)">
+            <span>這是「錯誤」操作（勾選 = ❌ 錯誤，不勾 = ✅ 正確）</span>
+          </label>
+        </div>
+        <div class="form-row">
+          <label class="form-label">揭曉後的說明</label>
+          <textarea id="f-item-explain" placeholder="正確或錯誤的原因說明，例如：❌ 錯誤！正確作法是…"></textarea>
+        </div>
+      </div>
+
+      <!-- 回收前怎麼做：題目 -->
+      <div id="recyclesteps-form" class="hidden">
+        <div class="two-col">
+          <div class="form-row">
+            <label class="form-label">圖示</label>
+            <input type="text" id="f-rs-emoji" placeholder="🧃">
+          </div>
+          <div class="form-row">
+            <label class="form-label">物品名稱</label>
+            <input type="text" id="f-rs-name" placeholder="例如：鋁箔包（利樂包）">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">題目問題</label>
+          <textarea id="f-rs-question" placeholder="回收前需要做哪些處理？"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">四個選項（A / B / C / D）</label>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <input type="text" id="f-rs-opt-0" placeholder="選項 A">
+            <input type="text" id="f-rs-opt-1" placeholder="選項 B">
+            <input type="text" id="f-rs-opt-2" placeholder="選項 C">
+            <input type="text" id="f-rs-opt-3" placeholder="選項 D">
           </div>
         </div>
         <div class="form-row">
           <label class="form-label">正確答案</label>
-          <select id="f-correct">
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
+          <select id="f-rs-correct">
+            <option value="0">A</option>
+            <option value="1">B</option>
+            <option value="2">C</option>
+            <option value="3">D</option>
           </select>
         </div>
         <div class="form-row">
-          <label class="form-label">解析說明（答題後顯示）</label>
-          <textarea id="f-explain" placeholder="輸入解析說明…"></textarea>
+          <label class="form-label">解析說明</label>
+          <textarea id="f-rs-explain" placeholder="🔍 解析說明…"></textarea>
         </div>
       </div>
 
-      <!-- 垃圾分類物品表單 -->
+      <!-- 垃圾大分類：物品 -->
       <div id="sorting-form" class="hidden">
         <div class="form-row">
           <label class="form-label">物品名稱</label>
@@ -521,23 +624,91 @@
         </div>
       </div>
 
-      <!-- 清潔步驟表單 -->
-      <div id="steps-form" class="hidden">
-        <div class="form-row">
-          <label class="form-label">圖示（Emoji）</label>
-          <input type="text" id="f-step-icon" placeholder="例如：🧽">
+      <!-- 配對挑戰：情境 -->
+      <div id="biomatch-form" class="hidden">
+        <div class="two-col">
+          <div class="form-row">
+            <label class="form-label">情境圖示</label>
+            <input type="text" id="f-bm-emoji" placeholder="🪲">
+          </div>
+          <div class="form-row">
+            <label class="form-label">情境標題</label>
+            <input type="text" id="f-bm-title" placeholder="例如：廚房排水管出現小蛾蚋">
+          </div>
         </div>
         <div class="form-row">
-          <label class="form-label">大標（步驟名稱）</label>
-          <input type="text" id="f-step-title" placeholder="例如：刷洗手台">
+          <label class="form-label">情境說明</label>
+          <textarea id="f-bm-desc" placeholder="描述具體情況，讓玩家理解問題所在…"></textarea>
         </div>
         <div class="form-row">
-          <label class="form-label">說明</label>
-          <textarea id="f-step-desc" placeholder="簡短說明這個步驟的重點…"></textarea>
+          <label class="form-label">正確防治工具</label>
+          <select id="f-bm-answer">
+            <option value="drain">🟤 溝渠劑（殺滅管道中的蛾蚋幼蟲）</option>
+            <option value="spray">💦 防蟑蟻噴劑（防治蟑螂和螞蟻）</option>
+            <option value="bacillus">🧫 枯草菌（分解有機物、消除管路異味）</option>
+          </select>
         </div>
         <div class="form-row">
-          <label class="form-label">所需工具</label>
-          <input type="text" id="f-step-tools" placeholder="例如：藍色海綿、邊角刷">
+          <label class="form-label">揭曉解析</label>
+          <textarea id="f-bm-explain" placeholder="🔍 解析說明…"></textarea>
+        </div>
+      </div>
+
+      <!-- 枯草菌操作：步驟編輯 -->
+      <div id="bacillus-form" class="hidden">
+        <div class="two-col">
+          <div class="form-row">
+            <label class="form-label">步驟圖示</label>
+            <input type="text" id="f-bac-emoji" placeholder="⚗️">
+          </div>
+          <div class="form-row">
+            <label class="form-label">步驟名稱</label>
+            <input type="text" id="f-bac-title" placeholder="例如：準備枯草菌液">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">題目問題</label>
+          <textarea id="f-bac-question" placeholder="枯草菌粉末加水稀釋時，正確比例是？"></textarea>
+        </div>
+
+        <div class="form-label" style="margin-bottom:0.5rem">三個選項（選一個為正確答案）</div>
+        <div class="info-box" style="margin-bottom:0.8rem;font-size:0.85rem">💡 勾選「正確答案」的那個，「答錯提示」欄位留空即可</div>
+
+        <div class="choice-row">
+          <div class="choice-row-header">
+            <input type="radio" name="f-bac-correct" value="0" id="f-bac-radio-0">
+            <label for="f-bac-radio-0">選項 1</label>
+          </div>
+          <input type="text" id="f-bac-choice-0" placeholder="選項文字…">
+          <label class="choice-warn-label">答錯提示（選這個選項時顯示的警示）</label>
+          <textarea id="f-bac-warn-0" style="min-height:55px" placeholder="⚠️ 不對喔，原因是…（正確答案的此欄留空）"></textarea>
+        </div>
+        <div class="choice-row">
+          <div class="choice-row-header">
+            <input type="radio" name="f-bac-correct" value="1" id="f-bac-radio-1">
+            <label for="f-bac-radio-1">選項 2</label>
+          </div>
+          <input type="text" id="f-bac-choice-1" placeholder="選項文字…">
+          <label class="choice-warn-label">答錯提示</label>
+          <textarea id="f-bac-warn-1" style="min-height:55px" placeholder="⚠️ 不對喔，原因是…（正確答案的此欄留空）"></textarea>
+        </div>
+        <div class="choice-row">
+          <div class="choice-row-header">
+            <input type="radio" name="f-bac-correct" value="2" id="f-bac-radio-2">
+            <label for="f-bac-radio-2">選項 3</label>
+          </div>
+          <input type="text" id="f-bac-choice-2" placeholder="選項文字…">
+          <label class="choice-warn-label">答錯提示</label>
+          <textarea id="f-bac-warn-2" style="min-height:55px" placeholder="⚠️ 不對喔，原因是…（正確答案的此欄留空）"></textarea>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">答對後的解析說明</label>
+          <textarea id="f-bac-explain" placeholder="✅ 正確！…"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">結果頁重點整理（一行文字）</label>
+          <input type="text" id="f-bac-summary" placeholder="例如：稀釋比例：1:40（1份菌粉 + 40份水）">
         </div>
       </div>
 
@@ -553,32 +724,95 @@
 
   <script>
   /* ==========================================
-     後台管理邏輯
+     預設資料
   ========================================== */
 
-  /* ── 預設資料（與遊戲檔案同步）── */
+  const DEFAULT_SPOTERROR = [
+    {
+      title: '打掃前準備',
+      items: [
+        { img: '../../images/tools/架房打掃用具(1)_page-0007.jpg', label: '三角立牌',    desc: '打掃前先在門口放三角立牌，提醒訪客',                isError: false, explain: '✅ 正確！打掃前一定要先放立牌，避免訪客誤入。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0039.jpg', label: '旋轉拖把',    desc: '直接開始用濕拖把拖地，跳過乾掃步驟',                isError: true,  explain: '❌ 錯誤！正確順序是先乾掃清除灰塵，再用濕拖把清潔地板，否則會越拖越髒。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0019.jpg', label: '大掃帚',      desc: '先用掃帚把地面灰塵掃乾淨再濕拖',                    isError: false, explain: '✅ 正確！乾掃在前、濕拖在後是基本 SOP。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0005.jpg', label: '多功能清潔劑', desc: '清潔劑不稀釋，直接用原液大量噴灑',                   isError: true,  explain: '❌ 錯誤！清潔劑必須按比例稀釋後使用，原液濃度過高可能傷害設備及皮膚。' }
+      ]
+    },
+    {
+      title: '抹布分色使用',
+      items: [
+        { img: '../../images/tools/架房打掃用具(1)_page-0021.jpg', label: '藍色抹布', desc: '藍色抹布：專門用來擦鏡子、玻璃、地板',           isError: false, explain: '✅ 正確！藍色抹布有固定用途，不能隨意換區域。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0022.jpg', label: '咖啡色抹布', desc: '咖啡色抹布先擦桌面後，繼續拿來擦廁所',         isError: true,  explain: '❌ 錯誤！不同區域（桌面與廁所）必須使用不同抹布，避免交叉污染。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0023.jpg', label: '抹布',       desc: '不管顏色，哪塊布順手就用哪塊',                 isError: true,  explain: '❌ 錯誤！抹布分色是衛生管理的基本原則，必須按顏色區分用途，不可混用。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0014.jpg', label: '馬桶刷',     desc: '每間廁所的馬桶刷各自獨立，不跨廁所使用',       isError: false, explain: '✅ 正確！馬桶刷是個人衛生工具，不可跨廁所混用。' }
+      ]
+    },
+    {
+      title: '清潔程序細節',
+      items: [
+        { img: '../../images/tools/架房打掃用具(1)_page-0007.jpg', label: '三角立牌', desc: '打掃完成後，記得收回放置的三角立牌',           isError: false, explain: '✅ 正確！打掃結束要把立牌收回，避免妨礙正常通行。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0006.jpg', label: '次氯酸水', desc: '次氯酸水噴完後立刻用抹布擦掉',                 isError: true,  explain: '❌ 錯誤！次氯酸水需靜置數分鐘讓消毒作用充分發揮，不能噴完馬上擦掉。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0039.jpg', label: '旋轉拖把', desc: '拖地方向：從房間最裡面往門口方向拖',           isError: false, explain: '✅ 正確！從裡往外拖，才不會把已拖好的地方再踩髒。' },
+        { img: '../../images/tools/架房打掃用具(1)_page-0009.jpg', label: '水桶',     desc: '拖地用同一桶水，從頭拖到底不換水',             isError: true,  explain: '❌ 錯誤！拖地水髒了要換，否則越拖越髒，水桶水需要定期更換。' }
+      ]
+    }
+  ];
 
-  const DEFAULT_QUIZ = [
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪個應該投入「塑膠」回收桶？',       options:['報紙','寶特瓶','口罩','鋁罐'],           answer:'寶特瓶',    explain:'寶特瓶（PET）屬塑膠類，記得清洗後壓扁再投入回收桶哦！' },
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「一般垃圾」？',              options:['玻璃瓶','鋁罐','用過的衛生紙','廢紙'],    answer:'用過的衛生紙',explain:'用過的衛生紙已受污染，屬一般垃圾，不可以放入紙類回收喔！' },
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪項屬於「廚餘」？',                  options:['口罩','鋁箔包','香蕉皮','塑膠袋'],         answer:'香蕉皮',    explain:'香蕉皮等食物殘渣屬廚餘，可以進行堆肥或廚餘處理，愛護環境！' },
-    { cat:'recycling', tag:'垃圾分類', q:'玻璃瓶應該投入哪個回收桶？',              options:['金屬','一般垃圾','塑膠','玻璃'],           answer:'玻璃',      explain:'玻璃瓶屬玻璃類回收，投入時要小心輕放，避免破裂受傷！' },
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪個可以投入「紙類」回收桶？',        options:['用過的衛生紙','鋁箔包','口罩','乾淨的報紙'], answer:'乾淨的報紙', explain:'只有乾淨、未受污染的紙才能回收，如報紙、書本、紙箱等。' },
-    { cat:'recycling', tag:'垃圾分類', q:'鋁罐屬於哪一類回收？',                    options:['塑膠','玻璃','金屬','紙類'],               answer:'金屬',      explain:'鋁罐和鐵罐都屬金屬類，清洗後投入金屬回收桶即可！' },
-    { cat:'recycling', tag:'垃圾分類', q:'鋁箔包（如果汁盒）應如何處理？',          options:['紙類回收','塑膠回收','一般垃圾','廚餘'],   answer:'一般垃圾',  explain:'鋁箔包是紙、鋁箔、塑膠的複合材質，無法分離，屬一般垃圾。' },
-    { cat:'recycling', tag:'垃圾分類', q:'用過的口罩應該投入哪裡？',                options:['廚餘','塑膠回收','紙類回收','一般垃圾'],   answer:'一般垃圾',  explain:'用過的口罩有污染疑慮，必須投入一般垃圾，不可放入回收桶！' },
-    { cat:'recycling', tag:'垃圾分類', q:'紙箱回收前應該怎麼處理？',                options:['直接投入一般垃圾','壓扁後投入紙類回收','投入塑膠回收','剪碎後丟廚餘'], answer:'壓扁後投入紙類回收', explain:'紙箱壓扁可以節省空間，讓更多人可以投入回收桶，環保又方便！' },
-    { cat:'recycling', tag:'垃圾分類', q:'玻璃杯破掉了，應該如何處理？',            options:['直接投入玻璃回收桶','用紙包好再投入玻璃回收','投入一般垃圾','丟廚餘'], answer:'用紙包好再投入玻璃回收', explain:'破裂的玻璃要先用報紙或厚紙包好，避免傷到別人，再投入玻璃回收！' },
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「金屬」類回收？',            options:['玻璃罐','寶特瓶','鐵罐','紙盒'],           answer:'鐵罐',      explain:'鐵罐、鋁罐都是金屬類，清洗後壓扁投入金屬回收桶！' },
-    { cat:'recycling', tag:'垃圾分類', q:'以下哪個屬於「廚餘」？',                  options:['口罩','免洗筷','菜葉','塑膠袋'],           answer:'菜葉',      explain:'菜葉、果皮、剩飯剩菜等食物殘渣都是廚餘，要和一般垃圾分開！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'架房小洗和大洗的第一步都是什麼？',                          options:['刷馬桶','噴清潔劑','放三角立牌','夾擦手紙'],                                      answer:'放三角立牌',             explain:'第一步一定是放三角立牌，提醒其他人「清潔中請勿進入」，保護清掃人員安全！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'小洗步驟中，「夾」指的是夾什麼？',                          options:['夾走垃圾桶','夾走架房的擦手紙和衛生紙','夾走掃具','夾走馬桶刷'],                answer:'夾走架房的擦手紙和衛生紙', explain:'「夾」是用夾子取走架房內用完的擦手紙和衛生紙，而且夾之前和夾之後都要噴次氯酸水消毒！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'擦拭馬桶坐墊（皮膚接觸面）應使用哪種顏色的布？',            options:['咖啡色布','藍色布','綠色魚鱗布','黃色海綿'],                                       answer:'藍色布',                 explain:'藍色布專用於擦馬桶座（皮膚接觸面）；咖啡色布擦馬桶外部和牆面。分色使用是避免交叉污染的重要習慣！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'刷洗手台時，洗手台的鏡面要用哪種工具擦拭？',                options:['咖啡色抹布','藍色海綿','魚鱗布（清水輾乾）','衛生紙'],                            answer:'魚鱗布（清水輾乾）',      explain:'鏡面要用魚鱗布，以清水輾乾後直接擦拭，才能擦出光亮不留水痕！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'刷馬桶時，蹲式馬桶要特別加強刷哪些地方？',                  options:['馬桶外側邊緣','水泥縫和出水孔','沖水鈕','排水孔蓋'],                             answer:'水泥縫和出水孔',          explain:'蹲式馬桶的水泥縫和出水孔最容易藏汙，要特別加強刷！坐式馬桶則要加強刷出水孔。' },
-    { cat:'cleaning',  tag:'架房清潔', q:'大洗「刮水」的正確方向是什麼？',                            options:['由外而內、由下而上','由內而外、由上而下','隨意刮都可以','只刮走道不刮架房內'],   answer:'由內而外、由上而下',       explain:'刮水要由內而外、由上而下，不會把刮過的地方再弄濕。架房內用小刮刀，外側地板用中大刮刀！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'大洗「潑清潔劑」的稀釋比例是多少？',                        options:['一瓶蓋清潔劑兌一桶水','半瓶清潔劑加半桶水','原液直接潑不加水','一匙清潔劑兌三桶水'], answer:'一瓶蓋清潔劑兌一桶水',  explain:'大洗潑清潔劑的比例是一瓶蓋清潔劑兌一桶水。先潑馬桶，再潑地板，可以用好神拖桶當運送泡泡車！' },
-    { cat:'cleaning',  tag:'架房清潔', q:'「消」這個步驟，咖啡色布要一網打盡地擦哪些地方？',          options:['只擦馬桶坐墊','只擦地板','門把、門鎖等所有接觸面','只擦洗手台'],                answer:'門把、門鎖等所有接觸面',  explain:'「消」要用咖啡色布一網打盡所有高接觸面，包含門把、門鎖！大洗還要加擦衛生紙盒、酒精盒、扶把等。' },
+  const DEFAULT_RECYCLESTEPS = [
+    {
+      emoji: '🧃', name: '鋁箔包（利樂包）',
+      question: '回收鋁箔包前，需要做哪些處理？',
+      options: [
+        { text: '拔掉吸管、剪開清洗、壓扁後投入回收桶', correct: true },
+        { text: '直接整包投入回收桶，不需處理', correct: false },
+        { text: '撕掉外層紙，只留中間鋁箔再回收', correct: false },
+        { text: '加熱融化後再回收', correct: false }
+      ],
+      explain: '🔍 鋁箔包由鋁箔、聚乙烯和紙板組成，材質較複雜。回收前要：① 拔掉或剪掉吸管、② 剪開沖洗乾淨、③ 壓扁，才能讓回收廠順利處理。'
+    },
+    {
+      emoji: '🍶', name: '寶特瓶（PET）',
+      question: '回收寶特瓶時，瓶蓋和瓶身需要分開投入嗎？',
+      options: [
+        { text: '不需要，瓶蓋和瓶身可以一起回收', correct: true },
+        { text: '需要，瓶蓋材質不同要分開投入', correct: false },
+        { text: '只能回收瓶身，瓶蓋要丟一般垃圾', correct: false },
+        { text: '要先把標籤撕掉才能回收', correct: false }
+      ],
+      explain: '🔍 寶特瓶（PET）的瓶蓋和瓶身可以一起回收，不需分開。清洗後壓扁即可投入回收桶。有顏色的寶特瓶也可以回收，有油脂的則歸塑膠瓶罐類。'
+    },
+    {
+      emoji: '🥫', name: '鐵罐 / 鋁罐',
+      question: '下列關於鐵罐和鋁罐的回收說明，哪個正確？',
+      options: [
+        { text: '鋁罐可踩扁；噴射式鐵罐（如殺蟲劑罐）不可壓縮', correct: true },
+        { text: '所有罐子都要踩扁後才能回收', correct: false },
+        { text: '罐子不需要清洗，直接丟入回收桶即可', correct: false },
+        { text: '鐵罐要撕掉標籤，鋁罐不用', correct: false }
+      ],
+      explain: '🔍 鋁罐質軟、可踩扁。鐵罐硬度高，噴射式鐵罐（殺蟲劑、噴漆罐等）內有殘壓，壓縮可能爆炸，千萬不可壓縮！所有罐子都要清洗再投入回收。'
+    },
+    {
+      emoji: '🥡', name: '免洗塑膠餐具',
+      question: '回收免洗塑膠餐盒時，下列說法哪個正確？',
+      options: [
+        { text: '清洗後可投入塑膠回收；免洗筷歸一般垃圾', correct: true },
+        { text: '免洗筷可以和塑膠餐盒一起投入回收桶', correct: false },
+        { text: '有油污直接投入塑膠回收桶，不用清洗', correct: false },
+        { text: '塑膠湯匙屬一般垃圾，不能回收', correct: false }
+      ],
+      explain: '🔍 免洗塑膠餐盒、湯碗、湯匙清洗後可投入塑膠回收。但免洗筷（木竹材質）和橡皮筋屬一般垃圾，不可放入塑膠回收。'
+    },
+    {
+      emoji: '📰', name: '紙類回收',
+      question: '下列哪種情況的紙，不可以投入紙類回收桶？',
+      options: [
+        { text: '沾滿油污或水濕的廢紙', correct: true },
+        { text: '乾淨的紙箱（硬紙板）', correct: false },
+        { text: '舊報紙和雜誌', correct: false },
+        { text: '乾淨的紙袋', correct: false }
+      ],
+      explain: '🔍 紙類回收的大原則是「乾淨才能回收」。沾了油污、食物殘渣或濕掉的紙（如油紙袋、濕紙巾）要歸一般垃圾。乾淨的紙箱、報紙、紙袋、書本都可以回收。'
+    }
   ];
 
   const DEFAULT_SORTING = [
@@ -602,48 +836,91 @@
     { name:'免洗筷', emoji:'🥢', bin:'一般垃圾', hint:'用過的免洗筷屬一般垃圾' },
   ];
 
-  /* ── 清潔步驟預設資料 ── */
-  const DEFAULT_STEPS = {
-    small: [
-      { id:1, icon:'🪧', title:'放', desc:'放三角立牌：清潔中請勿進入，保護清掃人員安全',                                tools:'三角立牌' },
-      { id:2, icon:'🧻', title:'夾', desc:'夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                      tools:'次氯酸水' },
-      { id:3, icon:'💦', title:'噴', desc:'多功能清潔劑噴入馬桶內及內側，讓清潔劑先發揮作用',                            tools:'多功能清潔劑' },
-      { id:4, icon:'🪥', title:'刷', desc:'馬桶刷刷洗馬桶；坐式加強出水孔、蹲式加強水泥縫和出水孔',                      tools:'馬桶刷' },
-      { id:5, icon:'🧽', title:'洗', desc:'噴多功能清潔劑；邊角刷刷縫隙、綠色海綿刷檯面、咖啡布擦乾、魚鱗布擦鏡',        tools:'邊角刷、綠色海綿、咖啡布、魚鱗布' },
-      { id:6, icon:'🧴', title:'擦', desc:'藍色布噴次氯酸水擦馬桶座（皮膚接觸面）；咖啡布擦馬桶外部和牆面',              tools:'次氯酸水、藍色布、咖啡布' },
-      { id:7, icon:'🔑', title:'消', desc:'咖啡布一網打盡：擦門把、門鎖等所有接觸面',                                    tools:'次氯酸水、咖啡布' },
-      { id:8, icon:'📦', title:'補', desc:'補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                            tools:'酒精、洗手乳、擦手紙' },
-      { id:9, icon:'🧹', title:'歸', desc:'好神拖加稀釋次氯酸水擦乾地板；所有工具清潔後整理歸位',                        tools:'好神拖、次氯酸水' },
-    ],
-    big: [
-      { id:1,  icon:'🪧', title:'放', desc:'放三角立牌：清潔中請勿進入，保護清掃人員安全',                                tools:'三角立牌' },
-      { id:2,  icon:'🧻', title:'夾', desc:'夾走架房的擦手紙和衛生紙；夾前和夾後都要噴次氯酸水消毒',                      tools:'次氯酸水' },
-      { id:3,  icon:'🪣', title:'潑', desc:'一瓶蓋清潔劑兌一桶水；先潑馬桶再潑地板，可用好神拖桶運送',                    tools:'多功能清潔劑、好神拖桶' },
-      { id:4,  icon:'🪥', title:'刷', desc:'刷馬桶內外；大洗加刷：馬桶座墊、架房地板、走道、水溝和水溝蓋',               tools:'馬桶刷、邊角刷' },
-      { id:5,  icon:'🧽', title:'洗', desc:'邊角刷刷縫隙、綠色海綿刷洗手台檯面、咖啡布擦乾、魚鱗布擦鏡',                 tools:'邊角刷、綠色海綿、咖啡布、魚鱗布' },
-      { id:6,  icon:'🚿', title:'沖', desc:'沖水沖走清潔劑和汙垢；水不要太多，避免濺濕牆面和感應器',                      tools:'水管' },
-      { id:7,  icon:'🔰', title:'刮', desc:'由內而外、由上而下刮水；架房內用小刮刀，外側地板用中大刮刀',                  tools:'小刮刀、中大刮刀' },
-      { id:8,  icon:'🧺', title:'擦', desc:'海綿拖把拖地；藍色布擦馬桶座；咖啡布擦馬桶外部和牆面',                        tools:'海綿拖把、藍色布、咖啡布' },
-      { id:9,  icon:'🔑', title:'消', desc:'咖啡布擦門把；次氯酸水擦衛生紙盒、酒精盒、扶把等架房內所有物品架',            tools:'次氯酸水、咖啡布' },
-      { id:10, icon:'📦', title:'補', desc:'補充酒精、洗手乳、擦手紙（禪七期間才需補衛生紙）',                            tools:'酒精、洗手乳、擦手紙' },
-      { id:11, icon:'🧹', title:'歸', desc:'好神拖擦乾地板；所有工具清潔整理後歸回物料間',                                tools:'好神拖' },
-    ],
-  };
+  const DEFAULT_BIOMATCH = [
+    { emoji:'🪲', title:'廚房排水管出現小蛾蚋',    desc:'排水管口附近飛著一群小小的飛蟲，那是蛾蚋（孑孓）。', answer:'drain',    explain:'🔍 蛾蚋幼蟲孳生於管道積污中。使用溝渠劑倒入排水管，可殺滅幼蟲，斷絕生長來源。' },
+    { emoji:'🪳', title:'架房角落發現蟑螂',        desc:'打掃時在牆角縫隙看到蟑螂出沒的痕跡。',               answer:'spray',    explain:'🔍 發現蟑螂活動跡象，使用防蟑蟻噴劑噴灑在縫隙、角落等常見藏匿處。' },
+    { emoji:'💨', title:'廁所散發不明異味',         desc:'廁所地漏和管道持續發出臭味，清洗後仍難消除。',         answer:'bacillus', explain:'🔍 管道異味多來自有機物堆積和細菌。枯草菌能分解有機殘留，從根本消除臭味。' },
+    { emoji:'🐜', title:'場所看到螞蟻行進',         desc:'地板上發現一列螞蟻，正往某個方向前進。',               answer:'spray',    explain:'🔍 螞蟻通常沿費洛蒙氣味路徑行進。使用防蟑蟻噴劑沿行進路線噴灑，並找到可能入侵點加強防範。' },
+    { emoji:'🚿', title:'淋浴間地漏積水有臭味',     desc:'淋浴間地漏排水不順，積水時傳出異臭。',                 answer:'bacillus', explain:'🔍 地漏積污分解產生臭味。倒入枯草菌，讓菌種分解有機物，在下線前使用效果最佳。' },
+    { emoji:'🪲', title:'地下室管道孳生蛾蚋幼蟲',   desc:'地下室積水處出現大量蛾蚋孑孓，影響環境衛生。',         answer:'drain',    explain:'🔍 積水是蛾蚋孑孓的溫床。使用溝渠劑倒入積水管道，殺滅幼蟲並預防孳生。' }
+  ];
+
+  const DEFAULT_BACILLUS = [
+    {
+      emoji: '⚗️', title: '準備枯草菌液',
+      question: '枯草菌粉末加水稀釋時，正確的稀釋比例是多少？',
+      choices: [
+        { text: '1:10（1 份菌粉 + 10 份水）', correct: false, warn: '⚠️ 濃度太高了！1:10 會造成浪費，而且不一定效果更好。正確比例是 1:40。' },
+        { text: '1:40（1 份菌粉 + 40 份水）', correct: true,  warn: '' },
+        { text: '1:100（1 份菌粉 + 100 份水）', correct: false, warn: '⚠️ 太稀了！1:100 菌種濃度不夠，效果會大打折扣。正確比例是 1:40。' }
+      ],
+      explain: '✅ 正確！枯草菌稀釋比例為 1:40（一份菌粉加四十份水）。稀釋後需靜置讓菌種活化，才能發揮最好的除臭效果。',
+      summary: '稀釋比例：1:40（1份菌粉 + 40份水）'
+    },
+    {
+      emoji: '⏰', title: '等待醒菌',
+      question: '加水稀釋後，需要靜置多久讓菌種「活化」，才能使用？',
+      choices: [
+        { text: '1 小時', correct: false, warn: '⚠️ 時間不夠！1 小時菌種還沒充分活化，效果很有限。需要靜置 12 小時。' },
+        { text: '6 小時', correct: false, warn: '⚠️ 差一點！6 小時的活化程度不足。標準是靜置 12 小時，讓菌種充分醒來。' },
+        { text: '12 小時', correct: true,  warn: '' }
+      ],
+      explain: '✅ 正確！枯草菌液加水後需靜置 12 小時，讓菌種充分活化（俗稱「醒菌」）。可以前一天晚上準備好，隔天使用。',
+      summary: '靜置醒菌：加水後靜置 12 小時'
+    },
+    {
+      emoji: '🕐', title: '選擇使用時機',
+      question: '什麼時候最適合把枯草菌液倒入排水孔？',
+      choices: [
+        { text: '義工早上上線前', correct: false, warn: '⚠️ 上線前倒，義工打掃時的清水會把菌種沖走，效果大打折扣。' },
+        { text: '義工用餐休息時', correct: false, warn: '⚠️ 用餐後還有清潔工作，管道會繼續進水沖刷，菌種還是容易被稀釋。' },
+        { text: '義工下線前（打掃收尾階段）', correct: true, warn: '' }
+      ],
+      explain: '✅ 正確！在義工下線前使用枯草菌，之後不會再有清水進入管道，菌種可以在靜止的環境中充分作用，效果最好。',
+      summary: '使用時機：義工下線前（打掃收尾階段）'
+    },
+    {
+      emoji: '💧', title: '倒入用量',
+      question: '每一個地漏或排水孔，要倒入多少枯草菌液？',
+      choices: [
+        { text: '100cc（大約半紙杯）', correct: false, warn: '⚠️ 量太少！100cc 不夠讓菌種進入管道深處，建議每孔倒入 500cc。' },
+        { text: '500cc（大約一大杯）', correct: true,  warn: '' },
+        { text: '1000cc（一整瓶礦泉水）', correct: false, warn: '⚠️ 量太多了！1000cc 不僅浪費，也不會有更好的效果。標準用量是每孔 500cc。' }
+      ],
+      explain: '✅ 正確！每個孔洞（地漏、排水管口）倒入 500cc 枯草菌液，讓菌種能充分進入管道內壁。',
+      summary: '每孔用量：500cc'
+    },
+    {
+      emoji: '🐜', title: '用後注意事項',
+      question: '枯草菌粉末有甜味，使用後要特別注意什麼？',
+      choices: [
+        { text: '馬上在旁邊噴防蟑蟻噴劑', correct: false, warn: '⚠️ 不建議！立刻噴殺蟲劑可能會影響剛倒入的枯草菌，讓菌種失活。應確認附近沒有螞蟻，而非噴藥。' },
+        { text: '確認周遭沒有螞蟻聚集', correct: true,  warn: '' },
+        { text: '立刻用大量清水沖洗', correct: false, warn: '⚠️ 千萬別沖水！大量清水會把剛倒入的枯草菌全部沖走，等於白做了。' }
+      ],
+      explain: '✅ 正確！枯草菌粉有天然甜味，操作完後要確認附近沒有螞蟻聚集。若有螞蟻，先清除再使用，避免甜味吸引螞蟻進入廁所。',
+      summary: '特別注意：菌粉有甜味，確認附近無螞蟻聚集'
+    }
+  ];
 
   /* ── 儲存 Key ── */
   const KEYS = {
-    quiz:     'ctcm_quiz_custom',
-    sorting:  'ctcm_sorting_custom',
-    steps:    'ctcm_steps_custom',
-    password: 'ctcm_admin_password',
+    spoterror:    'ctcm_spoterror_custom',
+    recyclesteps: 'ctcm_recyclesteps_custom',
+    sorting:      'ctcm_sorting_custom',
+    biomatch:     'ctcm_biomatch_custom',
+    bacillus:     'ctcm_bacillus_custom',
+    password:     'ctcm_admin_password',
   };
-
+  const SCRIPT_URL_KEY = 'ctcm_apps_script_url';
+  const LAST_SYNC_KEY  = 'ctcm_last_sync';
+  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuz80_jqKX0JBqFW6No-pAGnEfikbfaU9-oq_z892HernsfM2pTqZJB_x2yLq49eF8/exec';
   const DEFAULT_PASSWORD = 'ctcm2026';
 
   /* ── 工作資料 ── */
-  const data = { quiz: [], sorting: [], steps: { small: [], big: [] } };
-  let editState = null; // { type, index, mode? }
-  let currentTab = 'quiz';
+  const data = { spoterror: [], recyclesteps: [], sorting: [], biomatch: [], bacillus: [] };
+  let editState = null;
+  let currentTab = 'spoterror';
 
   /* ── 登入 / 登出 ── */
   function doLogin() {
@@ -658,25 +935,28 @@
       document.getElementById('pw-input').focus();
     }
   }
-
   function doLogout() {
     document.getElementById('pw-input').value = '';
     showScreen('login');
   }
 
   /* ── 資料讀取 ── */
+  function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
   function loadData() {
-    const cq = localStorage.getItem(KEYS.quiz);
-    data.quiz = cq ? JSON.parse(cq) : [...DEFAULT_QUIZ.map(q => ({...q, options: [...q.options]}))];
+    const cse = localStorage.getItem(KEYS.spoterror);
+    data.spoterror = cse ? JSON.parse(cse) : deepClone(DEFAULT_SPOTERROR);
+
+    const crs = localStorage.getItem(KEYS.recyclesteps);
+    data.recyclesteps = crs ? JSON.parse(crs) : deepClone(DEFAULT_RECYCLESTEPS);
 
     const cs = localStorage.getItem(KEYS.sorting);
-    data.sorting = cs ? JSON.parse(cs) : [...DEFAULT_SORTING.map(i => ({...i}))];
+    data.sorting = cs ? JSON.parse(cs) : DEFAULT_SORTING.map(i => ({...i}));
 
-    const cst = localStorage.getItem(KEYS.steps);
-    data.steps = cst ? JSON.parse(cst) : {
-      small: DEFAULT_STEPS.small.map(s => ({...s})),
-      big:   DEFAULT_STEPS.big.map(s => ({...s})),
-    };
+    const cbm = localStorage.getItem(KEYS.biomatch);
+    data.biomatch = cbm ? JSON.parse(cbm) : deepClone(DEFAULT_BIOMATCH);
+
+    const cbac = localStorage.getItem(KEYS.bacillus);
+    data.bacillus = cbac ? JSON.parse(cbac) : deepClone(DEFAULT_BACILLUS);
 
     renderAll();
   }
@@ -688,12 +968,16 @@
 
   /* ── 重置預設 ── */
   function resetToDefault(type) {
-    const labels = { quiz:'答題題目', sorting:'垃圾分類物品', steps:'清潔步驟' };
+    const labels = { spoterror:'找找看', recyclesteps:'回收前怎麼做', sorting:'垃圾大分類', biomatch:'配對挑戰', bacillus:'枯草菌操作' };
     if (!confirm(`確定要重置「${labels[type]}」為預設資料嗎？\n所有修改都會消失，無法復原！`)) return;
     localStorage.removeItem(KEYS[type]);
-    if (type === 'quiz')    data.quiz    = DEFAULT_QUIZ.map(q => ({...q, options: [...q.options]}));
-    if (type === 'sorting') data.sorting = DEFAULT_SORTING.map(i => ({...i}));
-    if (type === 'steps')   data.steps   = { small: DEFAULT_STEPS.small.map(s=>({...s})), big: DEFAULT_STEPS.big.map(s=>({...s})) };
+    switch(type) {
+      case 'spoterror':    data.spoterror    = deepClone(DEFAULT_SPOTERROR);    break;
+      case 'recyclesteps': data.recyclesteps = deepClone(DEFAULT_RECYCLESTEPS); break;
+      case 'sorting':      data.sorting      = DEFAULT_SORTING.map(i => ({...i})); break;
+      case 'biomatch':     data.biomatch     = deepClone(DEFAULT_BIOMATCH);     break;
+      case 'bacillus':     data.bacillus     = deepClone(DEFAULT_BACILLUS);     break;
+    }
     renderAll();
     showToast('已重置為預設資料');
   }
@@ -701,61 +985,87 @@
   /* ── 清除全部 ── */
   function clearAllData() {
     if (!confirm('確定要清除所有自訂資料嗎？遊戲將回到預設題目，此操作無法復原！')) return;
-    localStorage.removeItem(KEYS.quiz);
-    localStorage.removeItem(KEYS.sorting);
-    localStorage.removeItem(KEYS.steps);
+    Object.values(KEYS).filter(k => k !== KEYS.password).forEach(k => localStorage.removeItem(k));
     loadData();
     showToast('已清除所有自訂資料');
   }
 
-  /* ── 渲染列表 ── */
+  /* ── 渲染全部 ── */
   function renderAll() {
-    renderQuizList();
-    renderSortingList();
-    renderStepsList();
+    renderSpotError();
+    renderRecycleSteps();
+    renderSorting();
+    renderBioMatch();
+    renderBacillus();
   }
 
-  function renderQuizList() {
-    document.getElementById('quiz-count').textContent = `共 ${data.quiz.length} 題`;
-    const list = document.getElementById('quiz-list');
-
-    if (!data.quiz.length) {
-      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有題目，點上方「新增題目」開始！</div>';
-      return;
-    }
-
-    list.innerHTML = data.quiz.map((q, i) => `
-      <div class="item-card">
-        <div class="item-header">
-          <span class="tag ${q.cat === 'recycling' ? 'tag-green' : 'tag-blue'}">${q.tag}</span>
-          <span class="item-q">${q.q}</span>
-          <div class="item-actions">
-            <button class="btn-sm-edit" onclick="openForm('quiz',${i})">編輯</button>
-            <button class="btn-sm-del"  onclick="deleteItem('quiz',${i})">刪除</button>
-          </div>
+  /* ── 渲染：找找看 ── */
+  function renderSpotError() {
+    const container = document.getElementById('spoterror-rounds');
+    if (!container) return;
+    container.innerHTML = data.spoterror.map((round, ri) => `
+      <div class="round-section">
+        <div class="round-header">
+          <span class="round-header-title">第 ${ri + 1} 關：${round.title}</span>
+          <button class="btn-sm-edit" onclick="openForm('spoterror-round', ${ri})">✏️ 編輯標題</button>
         </div>
-        <div class="item-meta">正確答案：${q.answer}</div>
+        <div class="round-items">
+          ${round.items.map((item, ii) => `
+            <div class="item-card">
+              <div class="item-header">
+                <span class="tag ${item.isError ? 'tag-red' : 'tag-green'}">${item.isError ? '❌ 錯誤' : '✅ 正確'}</span>
+                <span class="item-q">${item.label}：${item.desc}</span>
+                <div class="item-actions">
+                  <button class="btn-sm-edit" onclick="openForm('spoterror-item', ${ri}, ${ii})">編輯</button>
+                </div>
+              </div>
+              <div class="item-meta">說明：${item.explain}</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
     `).join('');
   }
 
-  function renderSortingList() {
+  /* ── 渲染：回收前怎麼做 ── */
+  function renderRecycleSteps() {
+    document.getElementById('recyclesteps-count').textContent = `共 ${data.recyclesteps.length} 題`;
+    const list = document.getElementById('recyclesteps-list');
+    if (!data.recyclesteps.length) {
+      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有題目，點上方「新增題目」開始！</div>';
+      return;
+    }
+    list.innerHTML = data.recyclesteps.map((q, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span style="font-size:1.6rem;flex-shrink:0">${q.emoji}</span>
+          <span class="item-q">${q.name}：${q.question}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('recyclesteps', ${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('recyclesteps', ${i})">刪除</button>
+          </div>
+        </div>
+        <div class="item-meta">正確答案：${q.options.find(o => o.correct)?.text || '—'}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ── 渲染：垃圾大分類 ── */
+  function renderSorting() {
     document.getElementById('sorting-count').textContent = `共 ${data.sorting.length} 項`;
     const list = document.getElementById('sorting-list');
-
     if (!data.sorting.length) {
       list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有物品，點上方「新增物品」開始！</div>';
       return;
     }
-
     list.innerHTML = data.sorting.map((item, i) => `
       <div class="item-card">
         <div class="item-header">
           <span style="font-size:1.6rem;flex-shrink:0">${item.emoji}</span>
           <span class="item-q">${item.name}</span>
           <div class="item-actions">
-            <button class="btn-sm-edit" onclick="openForm('sorting',${i})">編輯</button>
-            <button class="btn-sm-del"  onclick="deleteItem('sorting',${i})">刪除</button>
+            <button class="btn-sm-edit" onclick="openForm('sorting', ${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('sorting', ${i})">刪除</button>
           </div>
         </div>
         <div class="item-meta">類別：${item.bin}　提示：${item.hint}</div>
@@ -763,86 +1073,141 @@
     `).join('');
   }
 
-  /* ── 清潔步驟列表渲染 ── */
-  function renderStepsList() {
-    renderStepSection('small', '🚿 架房小洗', 'steps-small-list');
-    renderStepSection('big',   '🪣 架房大洗', 'steps-big-list');
-  }
-
-  function renderStepSection(mode, label, listId) {
-    const steps = data.steps[mode];
-    const el    = document.getElementById(listId);
-    if (!el) return;
-    el.innerHTML = steps.map((s, i) => `
+  /* ── 渲染：配對挑戰 ── */
+  function renderBioMatch() {
+    document.getElementById('biomatch-count').textContent = `共 ${data.biomatch.length} 題`;
+    const list = document.getElementById('biomatch-list');
+    if (!data.biomatch.length) {
+      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有情境，點上方「新增情境」開始！</div>';
+      return;
+    }
+    const toolLabels = { drain: '🟤 溝渠劑', spray: '💦 防蟑蟻噴劑', bacillus: '🧫 枯草菌' };
+    list.innerHTML = data.biomatch.map((q, i) => `
       <div class="item-card">
         <div class="item-header">
-          <span style="font-size:1.6rem;flex-shrink:0">${s.icon}</span>
-          <span class="item-q">${s.id}. ${s.title}</span>
+          <span style="font-size:1.6rem;flex-shrink:0">${q.emoji}</span>
+          <span class="item-q">${q.title}</span>
           <div class="item-actions">
-            <button class="btn-sm-edit" onclick="openForm('steps',${i},'${mode}')">編輯</button>
+            <button class="btn-sm-edit" onclick="openForm('biomatch', ${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('biomatch', ${i})">刪除</button>
           </div>
         </div>
-        <div class="item-meta">說明：${s.desc}　工具：${s.tools}</div>
+        <div class="item-meta">正確工具：${toolLabels[q.answer] || q.answer}</div>
       </div>
     `).join('');
   }
 
-  /* ── 刪除 ── */
+  /* ── 渲染：枯草菌操作 ── */
+  function renderBacillus() {
+    const list = document.getElementById('bacillus-list');
+    if (!list) return;
+    list.innerHTML = data.bacillus.map((s, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span style="font-size:1.6rem;flex-shrink:0">${s.emoji}</span>
+          <span class="item-q">步驟 ${i + 1}：${s.title}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('bacillus', ${i})">編輯</button>
+          </div>
+        </div>
+        <div class="item-meta">問題：${s.question}</div>
+      </div>
+    `).join('');
+  }
+
+  /* ── 刪除項目 ── */
   function deleteItem(type, index) {
-    const label = type === 'quiz'
-      ? `題目「${data.quiz[index].q.substring(0, 25)}…」`
-      : `物品「${data.sorting[index].name}」`;
-    if (!confirm(`確定要刪除這個${label}嗎？`)) return;
+    const labelMap = {
+      recyclesteps: () => `題目「${data.recyclesteps[index].name}」`,
+      sorting:      () => `物品「${data.sorting[index].name}」`,
+      biomatch:     () => `情境「${data.biomatch[index].title}」`,
+    };
+    if (!confirm(`確定要刪除這個${labelMap[type]()}嗎？`)) return;
     data[type].splice(index, 1);
     persistData(type);
-    type === 'quiz' ? renderQuizList() : renderSortingList();
+    if (type === 'recyclesteps') renderRecycleSteps();
+    if (type === 'sorting')      renderSorting();
+    if (type === 'biomatch')     renderBioMatch();
     showToast('刪除成功');
   }
 
   /* ── 開啟表單 ── */
-  function openForm(type, index, mode) {
-    editState = { type, index, mode: mode || null };
-    const isEdit = index !== null;
+  function openForm(type, a, b) {
+    editState = { type, a, b };
+    const ALL_FORMS = ['spoterror-round-form','spoterror-item-form','recyclesteps-form',
+                       'sorting-form','biomatch-form','bacillus-form'];
+    ALL_FORMS.forEach(id => document.getElementById(id).classList.add('hidden'));
 
-    document.getElementById('form-title').textContent =
-      type === 'quiz'    ? (isEdit ? '編輯題目' : '新增題目')
-    : type === 'sorting' ? (isEdit ? '編輯物品' : '新增物品')
-    :                       '編輯步驟';
+    if (type === 'spoterror-round') {
+      document.getElementById('form-title').textContent = `編輯第 ${a + 1} 關標題`;
+      document.getElementById('f-round-title').value = data.spoterror[a].title;
+      document.getElementById('spoterror-round-form').classList.remove('hidden');
 
-    ['quiz-form','sorting-form','steps-form'].forEach(id =>
-      document.getElementById(id).classList.add('hidden')
-    );
+    } else if (type === 'spoterror-item') {
+      const item = data.spoterror[a].items[b];
+      document.getElementById('form-title').textContent = '編輯情境卡片';
+      document.getElementById('f-item-label').value = item.label;
+      document.getElementById('f-item-desc').value  = item.desc;
+      document.getElementById('f-item-iserror').checked = item.isError;
+      document.getElementById('f-item-explain').value   = item.explain;
+      document.getElementById('spoterror-item-form').classList.remove('hidden');
 
-    if (type === 'quiz') {
-      document.getElementById('quiz-form').classList.remove('hidden');
-      const q = isEdit ? data.quiz[index] : null;
-      document.getElementById('f-cat').value     = q ? q.cat         : 'recycling';
-      document.getElementById('f-q').value       = q ? q.q           : '';
-      document.getElementById('f-opt-a').value   = q ? (q.options[0]||'') : '';
-      document.getElementById('f-opt-b').value   = q ? (q.options[1]||'') : '';
-      document.getElementById('f-opt-c').value   = q ? (q.options[2]||'') : '';
-      document.getElementById('f-opt-d').value   = q ? (q.options[3]||'') : '';
-      document.getElementById('f-explain').value = q ? q.explain      : '';
+    } else if (type === 'recyclesteps') {
+      const isEdit = a !== null;
+      document.getElementById('form-title').textContent = isEdit ? '編輯題目' : '新增題目';
+      const q = isEdit ? data.recyclesteps[a] : null;
+      document.getElementById('f-rs-emoji').value    = q ? q.emoji    : '';
+      document.getElementById('f-rs-name').value     = q ? q.name     : '';
+      document.getElementById('f-rs-question').value = q ? q.question : '';
+      [0,1,2,3].forEach(i => {
+        document.getElementById(`f-rs-opt-${i}`).value = q ? (q.options[i]?.text || '') : '';
+      });
       if (q) {
-        const idx = q.options.indexOf(q.answer);
-        document.getElementById('f-correct').value = 'ABCD'[idx] || 'A';
+        const ci = q.options.findIndex(o => o.correct);
+        document.getElementById('f-rs-correct').value = ci >= 0 ? ci : 0;
       } else {
-        document.getElementById('f-correct').value = 'A';
+        document.getElementById('f-rs-correct').value = '0';
       }
+      document.getElementById('f-rs-explain').value = q ? q.explain : '';
+      document.getElementById('recyclesteps-form').classList.remove('hidden');
+
     } else if (type === 'sorting') {
-      document.getElementById('sorting-form').classList.remove('hidden');
-      const item = isEdit ? data.sorting[index] : null;
+      const isEdit = a !== null;
+      document.getElementById('form-title').textContent = isEdit ? '編輯物品' : '新增物品';
+      const item = isEdit ? data.sorting[a] : null;
       document.getElementById('f-name').value  = item ? item.name  : '';
       document.getElementById('f-emoji').value = item ? item.emoji : '';
       document.getElementById('f-bin').value   = item ? item.bin   : '一般垃圾';
       document.getElementById('f-hint').value  = item ? item.hint  : '';
-    } else if (type === 'steps') {
-      document.getElementById('steps-form').classList.remove('hidden');
-      const step = data.steps[mode][index];
-      document.getElementById('f-step-icon').value  = step.icon;
-      document.getElementById('f-step-title').value = step.title;
-      document.getElementById('f-step-desc').value  = step.desc;
-      document.getElementById('f-step-tools').value = step.tools;
+      document.getElementById('sorting-form').classList.remove('hidden');
+
+    } else if (type === 'biomatch') {
+      const isEdit = a !== null;
+      document.getElementById('form-title').textContent = isEdit ? '編輯情境' : '新增情境';
+      const q = isEdit ? data.biomatch[a] : null;
+      document.getElementById('f-bm-emoji').value   = q ? q.emoji   : '';
+      document.getElementById('f-bm-title').value   = q ? q.title   : '';
+      document.getElementById('f-bm-desc').value    = q ? q.desc    : '';
+      document.getElementById('f-bm-answer').value  = q ? q.answer  : 'drain';
+      document.getElementById('f-bm-explain').value = q ? q.explain : '';
+      document.getElementById('biomatch-form').classList.remove('hidden');
+
+    } else if (type === 'bacillus') {
+      const s = data.bacillus[a];
+      document.getElementById('form-title').textContent = `編輯步驟 ${a + 1}`;
+      document.getElementById('f-bac-emoji').value    = s.emoji;
+      document.getElementById('f-bac-title').value    = s.title;
+      document.getElementById('f-bac-question').value = s.question;
+      document.getElementById('f-bac-explain').value  = s.explain;
+      document.getElementById('f-bac-summary').value  = s.summary || '';
+      s.choices.forEach((c, i) => {
+        document.getElementById(`f-bac-choice-${i}`).value = c.text;
+        document.getElementById(`f-bac-warn-${i}`).value   = c.warn || '';
+      });
+      const correctIdx = s.choices.findIndex(c => c.correct);
+      const radio = document.querySelector(`input[name="f-bac-correct"][value="${correctIdx >= 0 ? correctIdx : 0}"]`);
+      if (radio) radio.checked = true;
+      document.getElementById('bacillus-form').classList.remove('hidden');
     }
 
     document.getElementById('form-overlay').classList.remove('hidden');
@@ -853,69 +1218,94 @@
     document.getElementById('form-overlay').classList.add('hidden');
     editState = null;
   }
-
   function handleOverlayClick(e) {
     if (e.target === document.getElementById('form-overlay')) closeForm();
   }
 
   /* ── 儲存表單 ── */
   function saveForm() {
-    const { type, index, mode } = editState;
-    const isEdit = index !== null;
+    const { type, a, b } = editState;
 
-    if (type === 'quiz') {
-      const cat     = document.getElementById('f-cat').value;
-      const q       = document.getElementById('f-q').value.trim();
-      const opts    = ['a','b','c','d'].map(x => document.getElementById(`f-opt-${x}`).value.trim());
-      const cidx    = 'ABCD'.indexOf(document.getElementById('f-correct').value);
-      const explain = document.getElementById('f-explain').value.trim();
+    if (type === 'spoterror-round') {
+      const title = document.getElementById('f-round-title').value.trim();
+      if (!title) { alert('請填寫關卡標題！'); return; }
+      data.spoterror[a].title = title;
+      persistData('spoterror');
+      renderSpotError();
 
-      if (!q || opts.some(o => !o) || !explain) {
-        alert('請填寫所有欄位！');
-        return;
+    } else if (type === 'spoterror-item') {
+      const label   = document.getElementById('f-item-label').value.trim();
+      const desc    = document.getElementById('f-item-desc').value.trim();
+      const isError = document.getElementById('f-item-iserror').checked;
+      const explain = document.getElementById('f-item-explain').value.trim();
+      if (!label || !desc || !explain) { alert('請填寫所有欄位！'); return; }
+      data.spoterror[a].items[b] = { ...data.spoterror[a].items[b], label, desc, isError, explain };
+      persistData('spoterror');
+      renderSpotError();
+
+    } else if (type === 'recyclesteps') {
+      const isEdit  = a !== null;
+      const emoji   = document.getElementById('f-rs-emoji').value.trim();
+      const name    = document.getElementById('f-rs-name').value.trim();
+      const question= document.getElementById('f-rs-question').value.trim();
+      const opts    = [0,1,2,3].map(i => document.getElementById(`f-rs-opt-${i}`).value.trim());
+      const ci      = parseInt(document.getElementById('f-rs-correct').value);
+      const explain = document.getElementById('f-rs-explain').value.trim();
+      if (!emoji || !name || !question || opts.some(o => !o) || !explain) {
+        alert('請填寫所有欄位！'); return;
       }
-
-      const item = { cat, tag: cat === 'recycling' ? '垃圾分類' : '架房清潔',
-                     q, options: opts, answer: opts[cidx], explain };
-      if (isEdit) data.quiz[index] = item;
-      else data.quiz.push(item);
-
-      persistData('quiz');
-      renderQuizList();
+      const item = { emoji, name, question, options: opts.map((text, i) => ({ text, correct: i === ci })), explain };
+      if (isEdit) data.recyclesteps[a] = item; else data.recyclesteps.push(item);
+      persistData('recyclesteps');
+      renderRecycleSteps();
 
     } else if (type === 'sorting') {
-      const name  = document.getElementById('f-name').value.trim();
-      const emoji = document.getElementById('f-emoji').value.trim();
-      const bin   = document.getElementById('f-bin').value;
-      const hint  = document.getElementById('f-hint').value.trim();
-
-      if (!name || !emoji || !hint) {
-        alert('請填寫所有欄位！');
-        return;
-      }
-
+      const isEdit = a !== null;
+      const name   = document.getElementById('f-name').value.trim();
+      const emoji  = document.getElementById('f-emoji').value.trim();
+      const bin    = document.getElementById('f-bin').value;
+      const hint   = document.getElementById('f-hint').value.trim();
+      if (!name || !emoji || !hint) { alert('請填寫所有欄位！'); return; }
       const item = { name, emoji, bin, hint };
-      if (isEdit) data.sorting[index] = item;
-      else data.sorting.push(item);
-
+      if (isEdit) data.sorting[a] = item; else data.sorting.push(item);
       persistData('sorting');
-      renderSortingList();
+      renderSorting();
 
-    } else if (type === 'steps') {
-      const { mode } = editState;
-      const icon  = document.getElementById('f-step-icon').value.trim();
-      const title = document.getElementById('f-step-title').value.trim();
-      const desc  = document.getElementById('f-step-desc').value.trim();
-      const tools = document.getElementById('f-step-tools').value.trim();
+    } else if (type === 'biomatch') {
+      const isEdit  = a !== null;
+      const emoji   = document.getElementById('f-bm-emoji').value.trim();
+      const title   = document.getElementById('f-bm-title').value.trim();
+      const desc    = document.getElementById('f-bm-desc').value.trim();
+      const answer  = document.getElementById('f-bm-answer').value;
+      const explain = document.getElementById('f-bm-explain').value.trim();
+      if (!emoji || !title || !desc || !explain) { alert('請填寫所有欄位！'); return; }
+      const item = { emoji, title, desc, answer, explain };
+      if (isEdit) data.biomatch[a] = item; else data.biomatch.push(item);
+      persistData('biomatch');
+      renderBioMatch();
 
-      if (!title || !desc) {
-        alert('大標和說明為必填！');
-        return;
-      }
-
-      data.steps[mode][index] = { ...data.steps[mode][index], icon, title, desc, tools };
-      persistData('steps');
-      renderStepsList();
+    } else if (type === 'bacillus') {
+      const emoji    = document.getElementById('f-bac-emoji').value.trim();
+      const title    = document.getElementById('f-bac-title').value.trim();
+      const question = document.getElementById('f-bac-question').value.trim();
+      const explain  = document.getElementById('f-bac-explain').value.trim();
+      const summary  = document.getElementById('f-bac-summary').value.trim();
+      const radioEl  = document.querySelector('input[name="f-bac-correct"]:checked');
+      if (!emoji || !title || !question || !explain) { alert('請填寫所有必填欄位！'); return; }
+      if (!radioEl) { alert('請選擇正確答案！'); return; }
+      const correctIdx = parseInt(radioEl.value);
+      const choices = [0,1,2].map(i => {
+        const text = document.getElementById(`f-bac-choice-${i}`).value.trim();
+        if (!text) return null;
+        const warn = document.getElementById(`f-bac-warn-${i}`).value.trim();
+        return i === correctIdx
+          ? { text, correct: true, warn: '' }
+          : { text, correct: false, warn: warn || '⚠️ 不對喔，請再想想！' };
+      });
+      if (choices.some(c => !c)) { alert('請填寫所有選項文字！'); return; }
+      data.bacillus[a] = { ...data.bacillus[a], emoji, title, question, choices, explain, summary };
+      persistData('bacillus');
+      renderBacillus();
     }
 
     closeForm();
@@ -934,54 +1324,30 @@
 
   /* ── 修改密碼 ── */
   function changePassword() {
-    const cur     = document.getElementById('pw-current').value;
-    const nw      = document.getElementById('pw-new').value;
-    const confirm = document.getElementById('pw-confirm').value;
-    const stored  = localStorage.getItem(KEYS.password) || DEFAULT_PASSWORD;
-
-    if (cur !== stored)  { alert('目前密碼錯誤！'); return; }
-    if (!nw)             { alert('新密碼不能為空！'); return; }
-    if (nw !== confirm)  { alert('兩次輸入的密碼不一致！'); return; }
-
+    const cur    = document.getElementById('pw-current').value;
+    const nw     = document.getElementById('pw-new').value;
+    const conf   = document.getElementById('pw-confirm').value;
+    const stored = localStorage.getItem(KEYS.password) || DEFAULT_PASSWORD;
+    if (cur !== stored) { alert('目前密碼錯誤！'); return; }
+    if (!nw)            { alert('新密碼不能為空！'); return; }
+    if (nw !== conf)    { alert('兩次輸入的密碼不一致！'); return; }
     localStorage.setItem(KEYS.password, nw);
     ['pw-current','pw-new','pw-confirm'].forEach(id => { document.getElementById(id).value = ''; });
     showToast('密碼已更新！');
   }
 
-  /* ── 工具 ── */
-  function showScreen(name) {
-    document.querySelectorAll('.screen,[id^=screen-]').forEach(s => s.classList.add('hidden'));
-    document.getElementById(`screen-${name}`).classList.remove('hidden');
-  }
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.remove('hidden');
-    clearTimeout(t._timer);
-    t._timer = setTimeout(() => t.classList.add('hidden'), 2500);
-  }
-
   /* ── Google Sheets 串接 ── */
-
-  const SCRIPT_URL_KEY = 'ctcm_apps_script_url';
-  const LAST_SYNC_KEY  = 'ctcm_last_sync';
-
-  const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuz80_jqKX0JBqFW6No-pAGnEfikbfaU9-oq_z892HernsfM2pTqZJB_x2yLq49eF8/exec';
-
   function loadScriptUrlField() {
     const url = localStorage.getItem(SCRIPT_URL_KEY) || DEFAULT_SCRIPT_URL;
     document.getElementById('script-url').value = url;
     updateSyncStatus();
   }
-
   function saveScriptUrl() {
     const url = document.getElementById('script-url').value.trim();
     localStorage.setItem(SCRIPT_URL_KEY, url);
     showToast('網址已儲存！');
     updateSyncStatus();
   }
-
   function updateSyncStatus() {
     const ts = parseInt(localStorage.getItem(LAST_SYNC_KEY) || '0');
     const el = document.getElementById('sync-status');
@@ -989,45 +1355,45 @@
     const d = new Date(ts);
     el.textContent = '上次同步：' + d.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
   }
-
   async function manualSync() {
     const url = localStorage.getItem(SCRIPT_URL_KEY) || '';
     if (!url) { alert('請先填入 Apps Script 網址！'); return; }
-
     const btn = document.getElementById('btn-sync');
     const status = document.getElementById('sync-status');
     btn.disabled = true;
     btn.textContent = '同步中…';
     status.textContent = '';
-
     try {
       const res  = await fetch(url);
       const json = await res.json();
-
       if (json.error) throw new Error(json.error);
-
-      if (json.quiz    && json.quiz.length)    { localStorage.setItem('ctcm_quiz_custom',    JSON.stringify(json.quiz));    data.quiz    = json.quiz;    renderQuizList(); }
-      if (json.sorting && json.sorting.length) { localStorage.setItem('ctcm_sorting_custom', JSON.stringify(json.sorting)); data.sorting = json.sorting; renderSortingList(); }
-      if (json.steps   && (json.steps.small || json.steps.big)) {
-        const merged = {
-          small: (json.steps.small || data.steps.small),
-          big:   (json.steps.big   || data.steps.big),
-        };
-        localStorage.setItem('ctcm_steps_custom', JSON.stringify(merged));
-        data.steps = merged;
-        renderStepsList();
+      if (json.sorting && json.sorting.length) {
+        localStorage.setItem(KEYS.sorting, JSON.stringify(json.sorting));
+        data.sorting = json.sorting;
+        renderSorting();
       }
-
       localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());
       showToast('✓ 同步成功！');
       updateSyncStatus();
-
     } catch (err) {
       alert('同步失敗：' + err.message + '\n請確認網址是否正確，以及 Apps Script 是否已部署。');
     } finally {
       btn.disabled = false;
       btn.textContent = '🔄 立即同步';
     }
+  }
+
+  /* ── 工具 ── */
+  function showScreen(name) {
+    document.querySelectorAll('[id^=screen-]').forEach(s => s.classList.add('hidden'));
+    document.getElementById(`screen-${name}`).classList.remove('hidden');
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.remove('hidden');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.add('hidden'), 2500);
   }
 
   /* ── 初始化 ── */

@@ -142,8 +142,9 @@
   <script>
   // ────────────────────────────────
   //  5 題，單選，答完即時顯示解說
+  //  優先從後台 localStorage 讀取
   // ────────────────────────────────
-  const questions = [
+  const DEFAULT_QUESTIONS = [
     {
       emoji: "🧃",
       name: "鋁箔包（利樂包）",
@@ -205,6 +206,9 @@
       explain: "🔍 紙類回收的大原則是「乾淨才能回收」。沾了油污、食物殘渣或濕掉的紙（如油紙袋、濕紙巾）要歸一般垃圾。乾淨的紙箱、報紙、紙袋、書本都可以回收。"
     }
   ];
+
+  const savedQ = localStorage.getItem('ctcm_recyclesteps_custom');
+  const questions = savedQ ? JSON.parse(savedQ) : DEFAULT_QUESTIONS;
 
   let current = 0;
   let score = 0;
