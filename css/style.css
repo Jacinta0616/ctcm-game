@@ -395,6 +395,31 @@ body {
   transform: scale(1.05);
 }
 
+/* ── 通用行動按鈕（確認 / 下一題 / 下一步）── */
+.btn-submit {
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 1.1rem 3.5rem;
+  font-size: clamp(1.1rem, 2.8vw, 1.35rem);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 260px;
+  letter-spacing: 0.04em;
+  transition: all 0.2s;
+}
+.btn-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.04);
+}
+.btn-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ── 動畫工具 ── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(24px); }
