@@ -79,15 +79,15 @@
     /* ── 回收桶格 ── */
     .bins-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.85rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.7rem;
     }
     .bin {
       background: white;
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
       border: 3px solid #e0e0e0;
-      padding: 1.1rem 0.4rem;
+      padding: 0.7rem 0.3rem;
       text-align: center;
       cursor: pointer;
       transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
@@ -97,7 +97,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0.3rem;
       font-family: inherit;
       -webkit-tap-highlight-color: transparent;
     }
@@ -106,21 +106,33 @@
       box-shadow: var(--shadow-md);
     }
     .bin:active:not(:disabled) { transform: scale(0.94); }
-    .bin-icon { font-size: 2.6rem; display: block; }
+    .bin-icon-img {
+      width: 100%;
+      max-width: 72px;
+      aspect-ratio: 513 / 640;
+      object-fit: contain;
+      border-radius: var(--radius-md);
+      display: block;
+    }
     .bin-name {
-      font-size: 0.95rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: var(--text);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.01em;
     }
 
     /* 各桶子 hover 主題色 */
-    .bin[data-bin="一般垃圾"]:hover:not(:disabled) { border-color: #78909c; background: #f5f5f5; }
-    .bin[data-bin="紙類"]:hover:not(:disabled)     { border-color: #795548; background: #efebe9; }
-    .bin[data-bin="塑膠"]:hover:not(:disabled)     { border-color: #1e88e5; background: #e3f2fd; }
-    .bin[data-bin="金屬"]:hover:not(:disabled)     { border-color: #546e7a; background: #eceff1; }
-    .bin[data-bin="玻璃"]:hover:not(:disabled)     { border-color: #00897b; background: #e0f2f1; }
-    .bin[data-bin="廚餘"]:hover:not(:disabled)     { border-color: #e64a19; background: #fbe9e7; }
+    .bin[data-bin="一般垃圾"]:hover:not(:disabled)     { border-color: #c2185b; background: #fce4ec; }
+    .bin[data-bin="塑膠免洗餐具"]:hover:not(:disabled) { border-color: #f9a825; background: #fff8e1; }
+    .bin[data-bin="紙類免洗餐具"]:hover:not(:disabled) { border-color: #5c6bc0; background: #e8eaf6; }
+    .bin[data-bin="塑膠類"]:hover:not(:disabled)       { border-color: #2e7d32; background: #e8f5e9; }
+    .bin[data-bin="塑膠容器"]:hover:not(:disabled)     { border-color: #d81b60; background: #fce4ec; }
+    .bin[data-bin="寶特瓶"]:hover:not(:disabled)       { border-color: #1565c0; background: #e3f2fd; }
+    .bin[data-bin="鐵鋁罐"]:hover:not(:disabled)       { border-color: #546e7a; background: #eceff1; }
+    .bin[data-bin="鋁箔包"]:hover:not(:disabled)       { border-color: #ef6c00; background: #fff3e0; }
+    .bin[data-bin="電子電器"]:hover:not(:disabled)     { border-color: #b71c1c; background: #ffebee; }
+    .bin[data-bin="紙類"]:hover:not(:disabled)         { border-color: #29b6f6; background: #e1f5fe; }
+    .bin[data-bin="報紙"]:hover:not(:disabled)         { border-color: #8d6e63; background: #efebe9; }
 
     /* 答對 / 答錯 狀態 */
     .bin.correct {
@@ -197,10 +209,10 @@
 
     /* ── RWD ── */
     @media (max-width: 520px) {
-      .bins-grid        { grid-template-columns: repeat(2, 1fr); }
+      .bins-grid        { grid-template-columns: repeat(3, 1fr); }
       .item-emoji       { font-size: 5rem; }
       .item-name        { font-size: 1.6rem; }
-      .bin-icon         { font-size: 2.1rem; }
+      .bin-icon-img     { max-width: 52px; }
       .feedback-bar     { font-size: 1rem; }
     }
   </style>
@@ -255,28 +267,48 @@
         <div class="sort-right">
           <div class="bins-grid">
             <button class="bin" data-bin="一般垃圾" onclick="selectBin('一般垃圾')">
-              <span class="bin-icon">🗑️</span>
+              <img class="bin-icon-img" src="../../images/bins/trash.jpg" alt="一般垃圾">
               <span class="bin-name">一般垃圾</span>
             </button>
+            <button class="bin" data-bin="塑膠免洗餐具" onclick="selectBin('塑膠免洗餐具')">
+              <img class="bin-icon-img" src="../../images/bins/plastic-tableware.jpg" alt="塑膠免洗餐具">
+              <span class="bin-name">塑膠免洗餐具</span>
+            </button>
+            <button class="bin" data-bin="紙類免洗餐具" onclick="selectBin('紙類免洗餐具')">
+              <img class="bin-icon-img" src="../../images/bins/paper-tableware.jpg" alt="紙類免洗餐具">
+              <span class="bin-name">紙類免洗餐具</span>
+            </button>
+            <button class="bin" data-bin="塑膠類" onclick="selectBin('塑膠類')">
+              <img class="bin-icon-img" src="../../images/bins/plastics.jpg" alt="塑膠類">
+              <span class="bin-name">塑膠類</span>
+            </button>
+            <button class="bin" data-bin="塑膠容器" onclick="selectBin('塑膠容器')">
+              <img class="bin-icon-img" src="../../images/bins/plastic-containers.jpg" alt="塑膠容器">
+              <span class="bin-name">塑膠容器</span>
+            </button>
+            <button class="bin" data-bin="寶特瓶" onclick="selectBin('寶特瓶')">
+              <img class="bin-icon-img" src="../../images/bins/pet-bottles.jpg" alt="寶特瓶">
+              <span class="bin-name">寶特瓶</span>
+            </button>
+            <button class="bin" data-bin="鐵鋁罐" onclick="selectBin('鐵鋁罐')">
+              <img class="bin-icon-img" src="../../images/bins/cans.jpg" alt="鐵鋁罐">
+              <span class="bin-name">鐵鋁罐</span>
+            </button>
+            <button class="bin" data-bin="鋁箔包" onclick="selectBin('鋁箔包')">
+              <img class="bin-icon-img" src="../../images/bins/foil-packs.jpg" alt="鋁箔包">
+              <span class="bin-name">鋁箔包</span>
+            </button>
+            <button class="bin" data-bin="電子電器" onclick="selectBin('電子電器')">
+              <img class="bin-icon-img" src="../../images/bins/electronics.jpg" alt="電子電器">
+              <span class="bin-name">電子電器</span>
+            </button>
             <button class="bin" data-bin="紙類" onclick="selectBin('紙類')">
-              <span class="bin-icon">📰</span>
-              <span class="bin-name">紙　　類</span>
+              <img class="bin-icon-img" src="../../images/bins/papers.jpg" alt="紙類">
+              <span class="bin-name">紙　類</span>
             </button>
-            <button class="bin" data-bin="塑膠" onclick="selectBin('塑膠')">
-              <span class="bin-icon">🧴</span>
-              <span class="bin-name">塑　　膠</span>
-            </button>
-            <button class="bin" data-bin="金屬" onclick="selectBin('金屬')">
-              <span class="bin-icon">🥫</span>
-              <span class="bin-name">金　　屬</span>
-            </button>
-            <button class="bin" data-bin="玻璃" onclick="selectBin('玻璃')">
-              <span class="bin-icon">🍾</span>
-              <span class="bin-name">玻　　璃</span>
-            </button>
-            <button class="bin" data-bin="廚餘" onclick="selectBin('廚餘')">
-              <span class="bin-icon">🥕</span>
-              <span class="bin-name">廚　　餘</span>
+            <button class="bin" data-bin="報紙" onclick="selectBin('報紙')">
+              <img class="bin-icon-img" src="../../images/bins/newspapers.jpg" alt="報紙">
+              <span class="bin-name">報　紙</span>
             </button>
           </div>
         </div>
@@ -305,26 +337,30 @@
      垃圾分類遊戲邏輯
   ========================================== */
 
-  /* ── 題庫（18 題，每局隨機抽 10 題）── */
+  /* ── 題庫（22 題，每局隨機抽 10 題，分類對應中台回收貼紙 11 分類）── */
   const ITEMS = [
-    { name: '報紙',   emoji: '📰', bin: '紙類',    hint: '乾淨的報紙、雜誌都可以回收' },
-    { name: '寶特瓶', emoji: '🧴', bin: '塑膠',    hint: '壓扁瓶身後投入塑膠回收' },
-    { name: '鋁罐',   emoji: '🥤', bin: '金屬',    hint: '鋁罐清洗後投入金屬回收' },
-    { name: '香蕉皮', emoji: '🍌', bin: '廚餘',    hint: '水果皮、果核都屬廚餘' },
-    { name: '塑膠袋', emoji: '🛍️', bin: '塑膠',    hint: '洗乾淨的塑膠袋可以回收' },
-    { name: '紙箱',   emoji: '📦', bin: '紙類',    hint: '紙箱壓扁後投入紙類回收' },
-    { name: '鐵罐',   emoji: '🥫', bin: '金屬',    hint: '鐵罐清洗後投入金屬回收' },
-    { name: '蘋果核', emoji: '🍎', bin: '廚餘',    hint: '果核、果皮都是廚餘' },
-    { name: '衛生紙', emoji: '🧻', bin: '一般垃圾', hint: '用過的衛生紙屬一般垃圾' },
-    { name: '玻璃瓶', emoji: '🍾', bin: '玻璃',    hint: '玻璃瓶請小心輕放投入' },
-    { name: '廢紙',   emoji: '📄', bin: '紙類',    hint: '乾淨的廢紙、作業紙可回收' },
-    { name: '便當盒', emoji: '🥡', bin: '塑膠',    hint: '清洗乾淨的塑膠便當盒可回收' },
-    { name: '口罩',   emoji: '😷', bin: '一般垃圾', hint: '用過的口罩屬一般垃圾' },
-    { name: '菜渣',   emoji: '🥬', bin: '廚餘',    hint: '蔬菜殘渣、葉子都是廚餘' },
-    { name: '玻璃杯', emoji: '🥛', bin: '玻璃',    hint: '玻璃杯屬玻璃類回收' },
-    { name: '書本',   emoji: '📚', bin: '紙類',    hint: '舊書、雜誌都可以回收' },
-    { name: '鋁箔包', emoji: '🧃', bin: '一般垃圾', hint: '複合材質不易分解，屬一般垃圾' },
-    { name: '免洗筷', emoji: '🥢', bin: '一般垃圾', hint: '用過的免洗筷屬一般垃圾' },
+    { name: '用過的衛生紙', emoji: '🧻', bin: '一般垃圾',   hint: '用過的衛生紙不可回收，屬一般垃圾' },
+    { name: '用過的口罩',   emoji: '😷', bin: '一般垃圾',   hint: '用過的口罩屬一般垃圾' },
+    { name: '茶包',         emoji: '🍵', bin: '一般垃圾',   hint: '茶包、咖啡濾掛包喝完屬一般垃圾' },
+    { name: '手搖飲料杯',   emoji: '🧋', bin: '塑膠免洗餐具', hint: '塑膠飲料杯清洗後投入塑膠免洗餐具' },
+    { name: '免洗湯匙',     emoji: '🥄', bin: '塑膠免洗餐具', hint: '塑膠免洗餐具清洗後才能回收' },
+    { name: '紙碗',         emoji: '🥣', bin: '紙類免洗餐具', hint: '紙碗、紙杯沖洗晾乾後投入紙類免洗餐具' },
+    { name: '紙便當盒',     emoji: '🍱', bin: '紙類免洗餐具', hint: '紙便當盒清洗晾乾後投入紙類免洗餐具' },
+    { name: '牙刷',         emoji: '🪥', bin: '塑膠類',      hint: '牙刷等小型塑膠製品屬塑膠類' },
+    { name: '原子筆',       emoji: '🖊️', bin: '塑膠類',      hint: '筆、筆蓋等塑膠文具屬塑膠類' },
+    { name: '牙膏軟管',     emoji: '🧴', bin: '塑膠容器',    hint: '牙膏軟管等軟性塑膠容器歸類為塑膠容器' },
+    { name: '養樂多瓶',     emoji: '🍼', bin: '塑膠容器',    hint: '養樂多、優酪乳瓶洗淨後投入塑膠容器' },
+    { name: '礦泉水寶特瓶', emoji: '🍶', bin: '寶特瓶',      hint: '寶特瓶壓扁後投入寶特瓶回收' },
+    { name: '運動飲料瓶',   emoji: '🥤', bin: '寶特瓶',      hint: '標示 PET 材質的飲料瓶屬寶特瓶類' },
+    { name: '鋁罐',         emoji: '🥫', bin: '鐵鋁罐',      hint: '鋁罐、鐵罐清洗後投入鐵鋁罐回收' },
+    { name: '奶粉罐',       emoji: '🫙', bin: '鐵鋁罐',      hint: '奶粉罐等鐵罐屬鐵鋁罐類' },
+    { name: '保久乳鋁箔包', emoji: '🧃', bin: '鋁箔包',      hint: '喝完、拉平、壓扁後投入鋁箔包回收，吸管丟一般垃圾' },
+    { name: '舊手機',       emoji: '📱', bin: '電子電器',    hint: '舊手機等 3C 產品屬電子電器回收' },
+    { name: '充電器',       emoji: '🔌', bin: '電子電器',    hint: '充電器、線材屬電子電器回收' },
+    { name: '紙提袋',       emoji: '🛍️', bin: '紙類',        hint: '紙提袋回收前請去除提袋繩' },
+    { name: '紙箱',         emoji: '📦', bin: '紙類',        hint: '紙箱壓扁後投入紙類回收' },
+    { name: '報紙',         emoji: '📰', bin: '報紙',        hint: '乾淨的報紙可以回收' },
+    { name: '廣告傳單',     emoji: '📄', bin: '報紙',        hint: '廣告傳單屬報紙類回收' },
   ];
 
   /* ── 遊戲狀態 ── */

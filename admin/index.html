@@ -611,11 +611,16 @@
           <label class="form-label">所屬類別</label>
           <select id="f-bin">
             <option value="一般垃圾">🗑️ 一般垃圾</option>
-            <option value="紙類">📰 紙類</option>
-            <option value="塑膠">🧴 塑膠</option>
-            <option value="金屬">🥫 金屬</option>
-            <option value="玻璃">🍾 玻璃</option>
-            <option value="廚餘">🥕 廚餘</option>
+            <option value="塑膠免洗餐具">🥤 塑膠免洗餐具</option>
+            <option value="紙類免洗餐具">🥡 紙類免洗餐具</option>
+            <option value="塑膠類">🖊️ 塑膠類</option>
+            <option value="塑膠容器">🧴 塑膠容器</option>
+            <option value="寶特瓶">🍶 寶特瓶</option>
+            <option value="鐵鋁罐">🥫 鐵鋁罐</option>
+            <option value="鋁箔包">🧃 鋁箔包</option>
+            <option value="電子電器">📱 電子電器</option>
+            <option value="紙類">📦 紙類</option>
+            <option value="報紙">📰 報紙</option>
           </select>
         </div>
         <div class="form-row">
@@ -816,24 +821,28 @@
   ];
 
   const DEFAULT_SORTING = [
-    { name:'報紙',   emoji:'📰', bin:'紙類',    hint:'乾淨的報紙、雜誌都可以回收' },
-    { name:'寶特瓶', emoji:'🧴', bin:'塑膠',    hint:'壓扁瓶身後投入塑膠回收' },
-    { name:'鋁罐',   emoji:'🥤', bin:'金屬',    hint:'鋁罐清洗後投入金屬回收' },
-    { name:'香蕉皮', emoji:'🍌', bin:'廚餘',    hint:'水果皮、果核都屬廚餘' },
-    { name:'塑膠袋', emoji:'🛍️', bin:'塑膠',    hint:'洗乾淨的塑膠袋可以回收' },
-    { name:'紙箱',   emoji:'📦', bin:'紙類',    hint:'紙箱壓扁後投入紙類回收' },
-    { name:'鐵罐',   emoji:'🥫', bin:'金屬',    hint:'鐵罐清洗後投入金屬回收' },
-    { name:'蘋果核', emoji:'🍎', bin:'廚餘',    hint:'果核、果皮都是廚餘' },
-    { name:'衛生紙', emoji:'🧻', bin:'一般垃圾', hint:'用過的衛生紙屬一般垃圾' },
-    { name:'玻璃瓶', emoji:'🍾', bin:'玻璃',    hint:'玻璃瓶請小心輕放投入' },
-    { name:'廢紙',   emoji:'📄', bin:'紙類',    hint:'乾淨的廢紙、作業紙可回收' },
-    { name:'便當盒', emoji:'🥡', bin:'塑膠',    hint:'清洗乾淨的塑膠便當盒可回收' },
-    { name:'口罩',   emoji:'😷', bin:'一般垃圾', hint:'用過的口罩屬一般垃圾' },
-    { name:'菜渣',   emoji:'🥬', bin:'廚餘',    hint:'蔬菜殘渣、葉子都是廚餘' },
-    { name:'玻璃杯', emoji:'🥛', bin:'玻璃',    hint:'玻璃杯屬玻璃類回收' },
-    { name:'書本',   emoji:'📚', bin:'紙類',    hint:'舊書、雜誌都可以回收' },
-    { name:'鋁箔包', emoji:'🧃', bin:'一般垃圾', hint:'複合材質不易分解，屬一般垃圾' },
-    { name:'免洗筷', emoji:'🥢', bin:'一般垃圾', hint:'用過的免洗筷屬一般垃圾' },
+    { name:'用過的衛生紙', emoji:'🧻', bin:'一般垃圾',     hint:'用過的衛生紙不可回收，屬一般垃圾' },
+    { name:'用過的口罩',   emoji:'😷', bin:'一般垃圾',     hint:'用過的口罩屬一般垃圾' },
+    { name:'茶包',         emoji:'🍵', bin:'一般垃圾',     hint:'茶包、咖啡濾掛包喝完屬一般垃圾' },
+    { name:'手搖飲料杯',   emoji:'🧋', bin:'塑膠免洗餐具', hint:'塑膠飲料杯清洗後投入塑膠免洗餐具' },
+    { name:'免洗湯匙',     emoji:'🥄', bin:'塑膠免洗餐具', hint:'塑膠免洗餐具清洗後才能回收' },
+    { name:'紙碗',         emoji:'🥣', bin:'紙類免洗餐具', hint:'紙碗、紙杯沖洗晾乾後投入紙類免洗餐具' },
+    { name:'紙便當盒',     emoji:'🍱', bin:'紙類免洗餐具', hint:'紙便當盒清洗晾乾後投入紙類免洗餐具' },
+    { name:'牙刷',         emoji:'🪥', bin:'塑膠類',       hint:'牙刷等小型塑膠製品屬塑膠類' },
+    { name:'原子筆',       emoji:'🖊️', bin:'塑膠類',       hint:'筆、筆蓋等塑膠文具屬塑膠類' },
+    { name:'牙膏軟管',     emoji:'🧴', bin:'塑膠容器',     hint:'牙膏軟管等軟性塑膠容器歸類為塑膠容器' },
+    { name:'養樂多瓶',     emoji:'🍼', bin:'塑膠容器',     hint:'養樂多、優酪乳瓶洗淨後投入塑膠容器' },
+    { name:'礦泉水寶特瓶', emoji:'🍶', bin:'寶特瓶',       hint:'寶特瓶壓扁後投入寶特瓶回收' },
+    { name:'運動飲料瓶',   emoji:'🥤', bin:'寶特瓶',       hint:'標示 PET 材質的飲料瓶屬寶特瓶類' },
+    { name:'鋁罐',         emoji:'🥫', bin:'鐵鋁罐',       hint:'鋁罐、鐵罐清洗後投入鐵鋁罐回收' },
+    { name:'奶粉罐',       emoji:'🫙', bin:'鐵鋁罐',       hint:'奶粉罐等鐵罐屬鐵鋁罐類' },
+    { name:'保久乳鋁箔包', emoji:'🧃', bin:'鋁箔包',       hint:'喝完、拉平、壓扁後投入鋁箔包回收，吸管丟一般垃圾' },
+    { name:'舊手機',       emoji:'📱', bin:'電子電器',     hint:'舊手機等 3C 產品屬電子電器回收' },
+    { name:'充電器',       emoji:'🔌', bin:'電子電器',     hint:'充電器、線材屬電子電器回收' },
+    { name:'紙提袋',       emoji:'🛍️', bin:'紙類',         hint:'紙提袋回收前請去除提袋繩' },
+    { name:'紙箱',         emoji:'📦', bin:'紙類',         hint:'紙箱壓扁後投入紙類回收' },
+    { name:'報紙',         emoji:'📰', bin:'報紙',         hint:'乾淨的報紙可以回收' },
+    { name:'廣告傳單',     emoji:'📄', bin:'報紙',         hint:'廣告傳單屬報紙類回收' },
   ];
 
   const DEFAULT_BIOMATCH = [
