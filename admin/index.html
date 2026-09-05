@@ -420,6 +420,7 @@
       <button class="tab-btn"        data-tab="sorting"      onclick="switchTab('sorting')">♻️ 垃圾大分類</button>
       <button class="tab-btn"        data-tab="biomatch"     onclick="switchTab('biomatch')">🎯 配對挑戰</button>
       <button class="tab-btn"        data-tab="bacillus"     onclick="switchTab('bacillus')">🧪 枯草菌操作</button>
+      <button class="tab-btn"        data-tab="mixedquiz"    onclick="switchTab('mixedquiz')">🎲 合併出題</button>
       <button class="tab-btn"        data-tab="settings"     onclick="switchTab('settings')">🔧 設定</button>
     </div>
 
@@ -469,6 +470,17 @@
         <button class="btn-danger" onclick="resetToDefault('bacillus')">↺ 重置預設</button>
       </div>
       <div id="bacillus-list"></div>
+    </div>
+
+    <!-- Tab: 合併出題 -->
+    <div id="tab-mixedquiz" class="tab-content hidden">
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openForm('mixedquiz', null)">＋ 新增題目</button>
+        <span class="count-label" id="mixedquiz-count"></span>
+        <button class="btn-danger" onclick="resetToDefault('mixedquiz')">↺ 重置預設</button>
+      </div>
+      <div class="info-box" style="margin-bottom:1rem;font-size:0.85rem">💡 首頁「合併出題」每次會從架房清潔／資源回收／生物防治三個主題各抽 4 題，混合成一場 12 題的測驗</div>
+      <div id="mixedquiz-list"></div>
     </div>
 
     <!-- Tab: 設定 -->
@@ -608,6 +620,10 @@
           <input type="text" id="f-emoji" placeholder="例如：📰（複製 emoji 貼上）">
         </div>
         <div class="form-row">
+          <label class="form-label">或改用照片路徑（選填，有填會優先於 Emoji 顯示）</label>
+          <input type="text" id="f-img" placeholder="例如：../../images/sorting-items/寶特瓶.jpg">
+        </div>
+        <div class="form-row">
           <label class="form-label">所屬類別</label>
           <select id="f-bin">
             <option value="一般垃圾">🗑️ 一般垃圾</option>
@@ -714,6 +730,44 @@
         <div class="form-row">
           <label class="form-label">結果頁重點整理（一行文字）</label>
           <input type="text" id="f-bac-summary" placeholder="例如：稀釋比例：1:40（1份菌粉 + 40份水）">
+        </div>
+      </div>
+
+      <!-- 合併出題：題目 -->
+      <div id="mixedquiz-form" class="hidden">
+        <div class="form-row">
+          <label class="form-label">所屬主題</label>
+          <select id="f-mq-cat">
+            <option value="cleaning">🧹 架房清潔</option>
+            <option value="recycle">♻️ 資源回收</option>
+            <option value="bio">🪲 生物防治</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">題目問題</label>
+          <textarea id="f-mq-question" placeholder="例如：寶特瓶應該投入哪一種回收類別？"></textarea>
+        </div>
+        <div class="form-row">
+          <label class="form-label">選項（前 3 個必填，第 4 個選填）</label>
+          <div style="display:flex;flex-direction:column;gap:0.5rem">
+            <input type="text" id="f-mq-opt-0" placeholder="選項 A">
+            <input type="text" id="f-mq-opt-1" placeholder="選項 B">
+            <input type="text" id="f-mq-opt-2" placeholder="選項 C">
+            <input type="text" id="f-mq-opt-3" placeholder="選項 D（選填，留空表示只有 3 個選項）">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">正確答案</label>
+          <select id="f-mq-correct">
+            <option value="0">A</option>
+            <option value="1">B</option>
+            <option value="2">C</option>
+            <option value="3">D</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">解析說明</label>
+          <textarea id="f-mq-explain" placeholder="解析說明…"></textarea>
         </div>
       </div>
 
@@ -912,6 +966,45 @@
     }
   ];
 
+  const DEFAULT_MIXEDQUIZ = [
+    // ── 架房清潔（8題）──
+    { cat:'cleaning', q:'架房小洗和大洗的第一步都是什麼？', options:['刷馬桶','噴清潔劑','放三角立牌','夾擦手紙'], answer:'放三角立牌', explain:'第一步一定是放三角立牌，提醒其他人「清潔中請勿進入」，保護清掃人員安全！' },
+    { cat:'cleaning', q:'小洗步驟中，「夾」指的是夾什麼？', options:['夾走垃圾桶','夾走架房的擦手紙和衛生紙','夾走掃具','夾走馬桶刷'], answer:'夾走架房的擦手紙和衛生紙', explain:'「夾」是用夾子取走架房內用完的擦手紙和衛生紙，而且夾之前和夾之後都要噴次氯酸水消毒！' },
+    { cat:'cleaning', q:'擦拭馬桶坐墊（皮膚接觸面）應使用哪種顏色的布？', options:['咖啡色布','藍色布','綠色魚鱗布','黃色海綿'], answer:'藍色布', explain:'藍色布專用於擦馬桶座（皮膚接觸面）；咖啡色布擦馬桶外部和牆面。分色使用是避免交叉污染的重要習慣！' },
+    { cat:'cleaning', q:'刷洗手台時，洗手台的鏡面要用哪種工具擦拭？', options:['咖啡色抹布','藍色海綿','魚鱗布（清水輾乾）','衛生紙'], answer:'魚鱗布（清水輾乾）', explain:'鏡面要用魚鱗布，以清水輾乾後直接擦拭，才能擦出光亮不留水痕！' },
+    { cat:'cleaning', q:'刷馬桶時，蹲式馬桶要特別加強刷哪些地方？', options:['馬桶外側邊緣','水泥縫和出水孔','沖水鈕','排水孔蓋'], answer:'水泥縫和出水孔', explain:'蹲式馬桶的水泥縫和出水孔最容易藏汙，要特別加強刷！坐式馬桶則要加強刷出水孔。' },
+    { cat:'cleaning', q:'大洗「刮水」的正確方向是什麼？', options:['由外而內、由下而上','由內而外、由上而下','隨意刮都可以','只刮走道不刮架房內'], answer:'由內而外、由上而下', explain:'刮水要由內而外、由上而下，不會把刮過的地方再弄濕。架房內用小刮刀，外側地板用中大刮刀！' },
+    { cat:'cleaning', q:'大洗「潑清潔劑」的稀釋比例是多少？', options:['一瓶蓋清潔劑兌一桶水','半瓶清潔劑加半桶水','原液直接潑不加水','一匙清潔劑兌三桶水'], answer:'一瓶蓋清潔劑兌一桶水', explain:'大洗潑清潔劑的比例是一瓶蓋清潔劑兌一桶水。先潑馬桶，再潑地板，可以用好神拖桶當運送泡泡車！' },
+    { cat:'cleaning', q:'「消」這個步驟，咖啡色布要一網打盡地擦哪些地方？', options:['只擦馬桶坐墊','只擦地板','門把、門鎖等所有接觸面','只擦洗手台'], answer:'門把、門鎖等所有接觸面', explain:'「消」要用咖啡色布一網打盡所有高接觸面，包含門把、門鎖！大洗還要加擦衛生紙盒、酒精盒、扶把等。' },
+
+    // ── 資源回收（12題）──
+    { cat:'recycle', q:'回收鋁箔包（利樂包，如保久乳）前，需要做哪些處理？', options:['拔掉吸管、剪開清洗、壓扁後投入回收桶','直接整包投入回收桶，不需處理','撕掉外層紙，只留中間鋁箔再回收','加熱融化後再回收'], answer:'拔掉吸管、剪開清洗、壓扁後投入回收桶', explain:'鋁箔包由鋁箔、聚乙烯和紙板組成，材質較複雜。回收前要：① 拔掉或剪掉吸管、② 剪開沖洗乾淨、③ 壓扁，才能讓回收廠順利處理。' },
+    { cat:'recycle', q:'回收寶特瓶時，瓶蓋和瓶身需要分開投入嗎？', options:['不需要，瓶蓋和瓶身可以一起回收','需要，瓶蓋材質不同要分開投入','只能回收瓶身，瓶蓋要丟一般垃圾','要先把標籤撕掉才能回收'], answer:'不需要，瓶蓋和瓶身可以一起回收', explain:'寶特瓶（PET）的瓶蓋和瓶身可以一起回收，不需分開。清洗後壓扁即可投入寶特瓶回收。' },
+    { cat:'recycle', q:'下列關於鐵罐和鋁罐（鐵鋁罐類）的回收說明，哪個正確？', options:['鋁罐可踩扁；噴射式鐵罐（如殺蟲劑罐）不可壓縮','所有罐子都要踩扁後才能回收','罐子不需要清洗，直接丟入回收桶即可','鐵罐要撕掉標籤，鋁罐不用'], answer:'鋁罐可踩扁；噴射式鐵罐（如殺蟲劑罐）不可壓縮', explain:'鋁罐質軟、可踩扁。鐵罐硬度高，噴射式鐵罐（殺蟲劑、噴漆罐等）內有殘壓，壓縮可能爆炸，千萬不可壓縮！所有罐子都要清洗再投入鐵鋁罐回收。' },
+    { cat:'recycle', q:'回收免洗塑膠餐具時，下列說法哪個正確？', options:['清洗後可投入塑膠免洗餐具回收；免洗筷歸一般垃圾','免洗筷可以和塑膠餐盒一起投入回收桶','有油污直接投入塑膠免洗餐具回收桶，不用清洗','塑膠湯匙屬一般垃圾，不能回收'], answer:'清洗後可投入塑膠免洗餐具回收；免洗筷歸一般垃圾', explain:'免洗塑膠餐盒、湯碗、湯匙清洗後可投入塑膠免洗餐具回收。但免洗筷（木竹材質）和橡皮筋屬一般垃圾，不可放入塑膠回收。' },
+    { cat:'recycle', q:'下列哪種情況的紙，不可以投入紙類回收桶？', options:['沾滿油污或水濕的廢紙','乾淨的紙箱（硬紙板）','舊報紙和雜誌','乾淨的紙袋'], answer:'沾滿油污或水濕的廢紙', explain:'紙類回收的大原則是「乾淨才能回收」。沾了油污、食物殘渣或濕掉的紙（如油紙袋、濕紙巾）要歸一般垃圾。乾淨的紙箱、報紙、紙袋、書本都可以回收。' },
+    { cat:'recycle', q:'牙膏用完的軟管，應該投入哪一種回收類別？', options:['塑膠容器','一般垃圾','塑膠類','鐵鋁罐'], answer:'塑膠容器', explain:'牙膏軟管等軟性塑膠容器，歸類為「塑膠容器」回收。' },
+    { cat:'recycle', q:'喝完的養樂多空瓶，應該投入哪一種回收類別？', options:['寶特瓶','塑膠免洗餐具','塑膠容器','一般垃圾'], answer:'塑膠容器', explain:'養樂多、優酪乳瓶洗淨後投入「塑膠容器」回收，跟寶特瓶（PET）是不同類別。' },
+    { cat:'recycle', q:'礦泉水的空寶特瓶，應該投入哪一種回收類別？', options:['寶特瓶','塑膠類','塑膠容器','一般垃圾'], answer:'寶特瓶', explain:'標示 PET 材質的礦泉水、飲料瓶，壓扁後投入「寶特瓶」回收。' },
+    { cat:'recycle', q:'手搖飲料喝完的塑膠杯，應該投入哪一種回收類別？', options:['塑膠免洗餐具','寶特瓶','塑膠容器','一般垃圾'], answer:'塑膠免洗餐具', explain:'手搖飲料的塑膠杯清洗後投入「塑膠免洗餐具」回收。' },
+    { cat:'recycle', q:'舊手機、充電器這類 3C 產品該怎麼回收？', options:['投入電子電器回收','跟鐵鋁罐一起回收','跟塑膠類一起回收','直接丟一般垃圾'], answer:'投入電子電器回收', explain:'舊手機、充電器、線材等 3C 產品都屬於「電子電器」回收。' },
+    { cat:'recycle', q:'奶粉罐（鐵罐）應該投入哪一種回收類別？', options:['鐵鋁罐','塑膠容器','電子電器','一般垃圾'], answer:'鐵鋁罐', explain:'奶粉罐等鐵罐屬於「鐵鋁罐」類回收。' },
+    { cat:'recycle', q:'喝完的保久乳（鋁箔包），回收前正確的處理順序是？', options:['喝完、拉平、壓扁後投入鋁箔包回收','直接丟寶特瓶回收','直接丟一般垃圾，不用處理','剪開後丟紙類回收'], answer:'喝完、拉平、壓扁後投入鋁箔包回收', explain:'鋁箔包回收三步驟：「喝完、拉平、壓扁」。吸管和吸管套喝完要丟一般垃圾，不能跟鋁箔包一起回收。' },
+
+    // ── 生物防治（11題）──
+    { cat:'bio', q:'排水管口附近飛著一群小小的飛蟲（蛾蚋），該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'溝渠劑', explain:'蛾蚋幼蟲孳生於管道積污中。使用溝渠劑倒入排水管，可殺滅幼蟲，斷絕生長來源。' },
+    { cat:'bio', q:'打掃時在牆角縫隙看到蟑螂出沒的痕跡，該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'防蟑蟻噴劑', explain:'發現蟑螂活動跡象，使用防蟑蟻噴劑噴灑在縫隙、角落等常見藏匿處。' },
+    { cat:'bio', q:'廁所地漏和管道持續發出臭味，清洗後仍難消除，該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'枯草菌', explain:'管道異味多來自有機物堆積和細菌。枯草菌能分解有機殘留，從根本消除臭味。' },
+    { cat:'bio', q:'地板上發現一列螞蟻正往某個方向前進，該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'防蟑蟻噴劑', explain:'螞蟻通常沿費洛蒙氣味路徑行進。使用防蟑蟻噴劑沿行進路線噴灑，並找到可能入侵點加強防範。' },
+    { cat:'bio', q:'淋浴間地漏排水不順，積水時傳出異臭，該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'枯草菌', explain:'地漏積污分解產生臭味。倒入枯草菌，讓菌種分解有機物，在下線前使用效果最佳。' },
+    { cat:'bio', q:'地下室積水處出現大量蛾蚋孑孓，該用什麼處理？', options:['溝渠劑','防蟑蟻噴劑','枯草菌'], answer:'溝渠劑', explain:'積水是蛾蚋孑孓的溫床。使用溝渠劑倒入積水管道，殺滅幼蟲並預防孳生。' },
+    { cat:'bio', q:'枯草菌粉末加水稀釋時，正確的稀釋比例是多少？', options:['1:10（1 份菌粉 + 10 份水）','1:40（1 份菌粉 + 40 份水）','1:100（1 份菌粉 + 100 份水）'], answer:'1:40（1 份菌粉 + 40 份水）', explain:'枯草菌稀釋比例為 1:40（一份菌粉加四十份水）。稀釋後需靜置讓菌種活化，才能發揮最好的除臭效果。' },
+    { cat:'bio', q:'枯草菌加水稀釋後，需要靜置多久讓菌種「活化」，才能使用？', options:['1 小時','6 小時','12 小時'], answer:'12 小時', explain:'枯草菌液加水後需靜置 12 小時，讓菌種充分活化（俗稱「醒菌」）。可以前一天晚上準備好，隔天使用。' },
+    { cat:'bio', q:'什麼時候最適合把枯草菌液倒入排水孔？', options:['義工早上上線前','義工用餐休息時','義工下線前（打掃收尾階段）'], answer:'義工下線前（打掃收尾階段）', explain:'在義工下線前使用枯草菌，之後不會再有清水進入管道，菌種可以在靜止的環境中充分作用，效果最好。' },
+    { cat:'bio', q:'每一個地漏或排水孔，要倒入多少枯草菌液？', options:['100cc（大約半紙杯）','500cc（大約一大杯）','1000cc（一整瓶礦泉水）'], answer:'500cc（大約一大杯）', explain:'每個孔洞（地漏、排水管口）倒入 500cc 枯草菌液，讓菌種能充分進入管道內壁。' },
+    { cat:'bio', q:'枯草菌粉末有甜味，使用後要特別注意什麼？', options:['馬上在旁邊噴防蟑蟻噴劑','確認周遭沒有螞蟻聚集','立刻用大量清水沖洗'], answer:'確認周遭沒有螞蟻聚集', explain:'枯草菌粉有天然甜味，操作完後要確認附近沒有螞蟻聚集。若有螞蟻，先清除再使用，避免甜味吸引螞蟻進入廁所。' },
+  ];
+
   /* ── 儲存 Key ── */
   const KEYS = {
     spoterror:    'ctcm_spoterror_custom',
@@ -919,6 +1012,7 @@
     sorting:      'ctcm_sorting_custom',
     biomatch:     'ctcm_biomatch_custom',
     bacillus:     'ctcm_bacillus_custom',
+    mixedquiz:    'ctcm_mixedquiz_custom',
     password:     'ctcm_admin_password',
   };
   const SCRIPT_URL_KEY = 'ctcm_apps_script_url';
@@ -927,7 +1021,7 @@
   const DEFAULT_PASSWORD = 'ctcm2026';
 
   /* ── 工作資料 ── */
-  const data = { spoterror: [], recyclesteps: [], sorting: [], biomatch: [], bacillus: [] };
+  const data = { spoterror: [], recyclesteps: [], sorting: [], biomatch: [], bacillus: [], mixedquiz: [] };
   let editState = null;
   let currentTab = 'spoterror';
 
@@ -967,6 +1061,9 @@
     const cbac = localStorage.getItem(KEYS.bacillus);
     data.bacillus = cbac ? JSON.parse(cbac) : deepClone(DEFAULT_BACILLUS);
 
+    const cmq = localStorage.getItem(KEYS.mixedquiz);
+    data.mixedquiz = cmq ? JSON.parse(cmq) : deepClone(DEFAULT_MIXEDQUIZ);
+
     renderAll();
   }
 
@@ -977,7 +1074,7 @@
 
   /* ── 重置預設 ── */
   function resetToDefault(type) {
-    const labels = { spoterror:'找找看', recyclesteps:'回收前怎麼做', sorting:'垃圾大分類', biomatch:'配對挑戰', bacillus:'枯草菌操作' };
+    const labels = { spoterror:'找找看', recyclesteps:'回收前怎麼做', sorting:'垃圾大分類', biomatch:'配對挑戰', bacillus:'枯草菌操作', mixedquiz:'合併出題' };
     if (!confirm(`確定要重置「${labels[type]}」為預設資料嗎？\n所有修改都會消失，無法復原！`)) return;
     localStorage.removeItem(KEYS[type]);
     switch(type) {
@@ -986,6 +1083,7 @@
       case 'sorting':      data.sorting      = DEFAULT_SORTING.map(i => ({...i})); break;
       case 'biomatch':     data.biomatch     = deepClone(DEFAULT_BIOMATCH);     break;
       case 'bacillus':     data.bacillus     = deepClone(DEFAULT_BACILLUS);     break;
+      case 'mixedquiz':    data.mixedquiz    = deepClone(DEFAULT_MIXEDQUIZ);    break;
     }
     renderAll();
     showToast('已重置為預設資料');
@@ -1006,6 +1104,31 @@
     renderSorting();
     renderBioMatch();
     renderBacillus();
+    renderMixedQuiz();
+  }
+
+  /* ── 渲染：合併出題 ── */
+  const MQ_CAT_LABEL = { cleaning: '🧹 架房清潔', recycle: '♻️ 資源回收', bio: '🪲 生物防治' };
+  function renderMixedQuiz() {
+    document.getElementById('mixedquiz-count').textContent = `共 ${data.mixedquiz.length} 題`;
+    const list = document.getElementById('mixedquiz-list');
+    if (!data.mixedquiz.length) {
+      list.innerHTML = '<div class="empty-state"><span>📭</span>還沒有題目，點上方「新增題目」開始！</div>';
+      return;
+    }
+    list.innerHTML = data.mixedquiz.map((q, i) => `
+      <div class="item-card">
+        <div class="item-header">
+          <span style="font-size:0.85rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:999px;background:#f5f5f5;flex-shrink:0">${MQ_CAT_LABEL[q.cat] || q.cat}</span>
+          <span class="item-q">${q.q}</span>
+          <div class="item-actions">
+            <button class="btn-sm-edit" onclick="openForm('mixedquiz', ${i})">編輯</button>
+            <button class="btn-sm-del"  onclick="deleteItem('mixedquiz', ${i})">刪除</button>
+          </div>
+        </div>
+        <div class="item-meta">正確答案：${q.answer}　解析：${q.explain}</div>
+      </div>
+    `).join('');
   }
 
   /* ── 渲染：找找看 ── */
@@ -1070,7 +1193,9 @@
     list.innerHTML = data.sorting.map((item, i) => `
       <div class="item-card">
         <div class="item-header">
-          <span style="font-size:1.6rem;flex-shrink:0">${item.emoji}</span>
+          ${item.img
+            ? `<img src="${item.img}" alt="${item.name}" style="width:2rem;height:2rem;object-fit:cover;border-radius:6px;flex-shrink:0">`
+            : `<span style="font-size:1.6rem;flex-shrink:0">${item.emoji}</span>`}
           <span class="item-q">${item.name}</span>
           <div class="item-actions">
             <button class="btn-sm-edit" onclick="openForm('sorting', ${i})">編輯</button>
@@ -1130,6 +1255,7 @@
       recyclesteps: () => `題目「${data.recyclesteps[index].name}」`,
       sorting:      () => `物品「${data.sorting[index].name}」`,
       biomatch:     () => `情境「${data.biomatch[index].title}」`,
+      mixedquiz:    () => `題目「${data.mixedquiz[index].q}」`,
     };
     if (!confirm(`確定要刪除這個${labelMap[type]()}嗎？`)) return;
     data[type].splice(index, 1);
@@ -1137,6 +1263,7 @@
     if (type === 'recyclesteps') renderRecycleSteps();
     if (type === 'sorting')      renderSorting();
     if (type === 'biomatch')     renderBioMatch();
+    if (type === 'mixedquiz')    renderMixedQuiz();
     showToast('刪除成功');
   }
 
@@ -1144,7 +1271,7 @@
   function openForm(type, a, b) {
     editState = { type, a, b };
     const ALL_FORMS = ['spoterror-round-form','spoterror-item-form','recyclesteps-form',
-                       'sorting-form','biomatch-form','bacillus-form'];
+                       'sorting-form','biomatch-form','bacillus-form','mixedquiz-form'];
     ALL_FORMS.forEach(id => document.getElementById(id).classList.add('hidden'));
 
     if (type === 'spoterror-round') {
@@ -1186,6 +1313,7 @@
       const item = isEdit ? data.sorting[a] : null;
       document.getElementById('f-name').value  = item ? item.name  : '';
       document.getElementById('f-emoji').value = item ? item.emoji : '';
+      document.getElementById('f-img').value   = item ? (item.img || '') : '';
       document.getElementById('f-bin').value   = item ? item.bin   : '一般垃圾';
       document.getElementById('f-hint').value  = item ? item.hint  : '';
       document.getElementById('sorting-form').classList.remove('hidden');
@@ -1217,6 +1345,19 @@
       const radio = document.querySelector(`input[name="f-bac-correct"][value="${correctIdx >= 0 ? correctIdx : 0}"]`);
       if (radio) radio.checked = true;
       document.getElementById('bacillus-form').classList.remove('hidden');
+
+    } else if (type === 'mixedquiz') {
+      const isEdit = a !== null;
+      document.getElementById('form-title').textContent = isEdit ? '編輯題目' : '新增題目';
+      const q = isEdit ? data.mixedquiz[a] : null;
+      document.getElementById('f-mq-cat').value      = q ? q.cat : 'cleaning';
+      document.getElementById('f-mq-question').value = q ? q.q   : '';
+      [0,1,2,3].forEach(i => {
+        document.getElementById(`f-mq-opt-${i}`).value = q ? (q.options[i] || '') : '';
+      });
+      document.getElementById('f-mq-correct').value = q ? Math.max(0, q.options.indexOf(q.answer)) : '0';
+      document.getElementById('f-mq-explain').value = q ? q.explain : '';
+      document.getElementById('mixedquiz-form').classList.remove('hidden');
     }
 
     document.getElementById('form-overlay').classList.remove('hidden');
@@ -1272,10 +1413,11 @@
       const isEdit = a !== null;
       const name   = document.getElementById('f-name').value.trim();
       const emoji  = document.getElementById('f-emoji').value.trim();
+      const img    = document.getElementById('f-img').value.trim();
       const bin    = document.getElementById('f-bin').value;
       const hint   = document.getElementById('f-hint').value.trim();
-      if (!name || !emoji || !hint) { alert('請填寫所有欄位！'); return; }
-      const item = { name, emoji, bin, hint };
+      if (!name || (!emoji && !img) || !hint) { alert('請至少填寫 Emoji 或照片路徑其中一項！'); return; }
+      const item = img ? { name, emoji, img, bin, hint } : { name, emoji, bin, hint };
       if (isEdit) data.sorting[a] = item; else data.sorting.push(item);
       persistData('sorting');
       renderSorting();
@@ -1315,6 +1457,24 @@
       data.bacillus[a] = { ...data.bacillus[a], emoji, title, question, choices, explain, summary };
       persistData('bacillus');
       renderBacillus();
+
+    } else if (type === 'mixedquiz') {
+      const isEdit = a !== null;
+      const cat     = document.getElementById('f-mq-cat').value;
+      const q       = document.getElementById('f-mq-question').value.trim();
+      const opts    = [0,1,2,3].map(i => document.getElementById(`f-mq-opt-${i}`).value.trim());
+      const ci      = parseInt(document.getElementById('f-mq-correct').value);
+      const explain = document.getElementById('f-mq-explain').value.trim();
+      if (!q || !explain || !opts[0] || !opts[1] || !opts[2]) {
+        alert('請填寫題目、解析，以及至少前 3 個選項！'); return;
+      }
+      if (!opts[ci]) { alert('正確答案對應的選項是空的，請確認！'); return; }
+      const answer  = opts[ci];
+      const options = opts.filter(o => o);
+      const item = { cat, q, options, answer, explain };
+      if (isEdit) data.mixedquiz[a] = item; else data.mixedquiz.push(item);
+      persistData('mixedquiz');
+      renderMixedQuiz();
     }
 
     closeForm();

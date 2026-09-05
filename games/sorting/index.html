@@ -49,6 +49,16 @@
       line-height: 1.15;
       animation: iconWiggle 2.5s ease-in-out infinite;
     }
+    .item-photo {
+      width: 100%;
+      max-width: 220px;
+      height: 160px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      border-radius: var(--radius-md);
+      background: #f5f5f5;
+    }
     .item-name {
       font-size: 2rem;
       font-weight: 900;
@@ -258,6 +268,7 @@
         <div class="sort-left">
           <div id="item-card" class="item-card">
             <span id="item-emoji" class="item-emoji">♻️</span>
+            <img id="item-photo" class="item-photo hidden" src="" alt="">
             <span id="item-name" class="item-name">物品名稱</span>
           </div>
           <div id="feedback" class="feedback-bar fb-empty">　</div>
@@ -411,7 +422,18 @@
   function renderItem() {
     const item = state.items[state.current];
 
-    document.getElementById('item-emoji').textContent = item.emoji;
+    const emojiEl = document.getElementById('item-emoji');
+    const photoEl = document.getElementById('item-photo');
+    if (item.img) {
+      photoEl.src = item.img;
+      photoEl.alt = item.name;
+      photoEl.classList.remove('hidden');
+      emojiEl.classList.add('hidden');
+    } else {
+      emojiEl.textContent = item.emoji;
+      emojiEl.classList.remove('hidden');
+      photoEl.classList.add('hidden');
+    }
     document.getElementById('item-name').textContent  = item.name;
     document.getElementById('q-cur').textContent      = state.current + 1;
     document.getElementById('progress-fill').style.width =

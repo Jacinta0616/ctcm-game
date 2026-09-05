@@ -251,6 +251,14 @@ body {
 .card-bacillus:hover { border-color: #ab47bc; }
 .card-bacillus .card-icon { animation-delay: 1.6s; }
 
+/* 首頁：合併出題 / 選主題出題 */
+.card-mixed  .btn-play  { background: linear-gradient(135deg, #ff8a65, #d84315); }
+.card-theme  .btn-play  { background: linear-gradient(135deg, var(--green-mid), var(--green-dark)); }
+.card-mixed:hover   { border-color: #ff8a65; }
+.card-mixed .card-icon { animation-delay: 0.4s; }
+.card-theme:hover   { border-color: var(--green-mid); }
+.card-theme .card-icon { animation-delay: 1.2s; }
+
 /* ── 三欄主題格（首頁）── */
 .theme-grid {
   grid-template-columns: repeat(3, 1fr);
