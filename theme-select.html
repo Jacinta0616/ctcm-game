@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>選擇主題 | 環保小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 背景裝飾 -->
+  <div class="bg-deco" aria-hidden="true">
+    <span class="leaf" style="top:8%;left:4%;font-size:1.8rem;animation-delay:0s">🌿</span>
+    <span class="leaf" style="top:18%;right:6%;font-size:2.2rem;animation-delay:1.5s">🍃</span>
+    <span class="leaf" style="top:55%;left:2%;font-size:1.4rem;animation-delay:3s">🌱</span>
+    <span class="leaf" style="bottom:28%;right:4%;font-size:2rem;animation-delay:2s">🍀</span>
+    <span class="leaf" style="bottom:12%;left:8%;font-size:1.6rem;animation-delay:4s">🌿</span>
+    <span class="leaf" style="top:72%;right:10%;font-size:1.3rem;animation-delay:0.8s">🍃</span>
+  </div>
+
+  <div class="container">
+
+    <!-- 頂部導覽 -->
+    <nav class="game-nav">
+      <a href="index.html" class="btn-back">← 回首頁</a>
+      <span class="game-title-bar">🗂️ 選主題出題</span>
+    </nav>
+
+    <!-- 主題選擇 -->
+    <main>
+      <h2 class="section-title">選擇主題，開始挑戰</h2>
+      <div class="games-grid theme-grid">
+
+        <!-- 主題 1：架房清潔 -->
+        <a href="themes/cleaning.html" class="game-card card-clean">
+          <div class="card-icon">🧹</div>
+          <div class="card-body">
+            <h3>架房清潔</h3>
+            <p>清潔工具怎麼用？<br>打掃 SOP 你都知道嗎？</p>
+          </div>
+          <span class="btn-play">進入主題 →</span>
+        </a>
+
+        <!-- 主題 2：資源回收 -->
+        <a href="themes/recycle.html" class="game-card card-sort">
+          <div class="card-icon">♻️</div>
+          <div class="card-body">
+            <h3>資源回收</h3>
+            <p>回收前怎麼處理？<br>哪些能回收哪些不行？</p>
+          </div>
+          <span class="btn-play">進入主題 →</span>
+        </a>
+
+        <!-- 主題 3：生物防治 -->
+        <a href="themes/bio.html" class="game-card card-bio">
+          <div class="card-icon">🪲</div>
+          <div class="card-body">
+            <h3>生物防治</h3>
+            <p>蟑螂蛾蚋螞蟻怎麼辦？<br>用對工具輕鬆搞定</p>
+          </div>
+          <span class="btn-play">進入主題 →</span>
+        </a>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>
