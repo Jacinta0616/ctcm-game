@@ -186,7 +186,7 @@
         <h2 class="start-title">合併出題大挑戰</h2>
         <p class="start-desc">
           三大主題混合出題，一次考驗你的環保知識！<br>
-          共 <strong>12 題</strong>，每題 <strong>10 分</strong>
+          共 <strong>5 題</strong>，每題 <strong>20 分</strong>
         </p>
         <div class="theme-tags">
           <span class="theme-tag tag-cleaning">🧹 架房清潔</span>
@@ -204,7 +204,7 @@
         <!-- 左欄：進度 + 題目 -->
         <div class="quiz-left">
           <div class="progress-wrap">
-            <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 12 題</div>
+            <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 5 題</div>
             <div class="progress-track">
               <div id="progress-fill" class="progress-fill" style="width:0%"></div>
             </div>
@@ -230,7 +230,7 @@
     <div id="screen-result" class="screen hidden">
       <div class="result-screen">
         <span id="result-emoji" class="result-emoji">🏆</span>
-        <p id="result-score" class="result-score">120 分</p>
+        <p id="result-score" class="result-score">100 分</p>
         <div id="result-stars" class="result-stars"></div>
         <p id="result-msg" class="result-message">太厲害了！</p>
         <div class="result-actions">
@@ -245,7 +245,7 @@
   <script>
   /* ==========================================
      合併出題大挑戰 — 從架房清潔／資源回收／生物防治
-     三大主題各抽 4 題，混合成一場 12 題的綜合測驗
+     三大主題各保底抽 1 題，剩下名額隨機補滿，共 5 題
   ========================================== */
 
   const TAG_LABEL = { cleaning: '🧹 架房清潔', recycle: '♻️ 資源回收', bio: '🪲 生物防治' };
@@ -513,12 +513,12 @@
     questions: [],
     current:   0,
     score:     0,
-    total:     12,
+    total:     5,
     lock:      false,
   };
 
-  const LABELS = ['A', 'B', 'C', 'D'];
-  const PER_CAT = 4;
+  const LABELS  = ['A', 'B', 'C', 'D'];
+  const TOTAL_Q = 5;
 
   /* ── 工具 ── */
   function shuffle(arr) {
@@ -544,17 +544,23 @@
     return QUESTIONS;
   }
 
-  /* ── 開始遊戲：三大主題各抽 PER_CAT 題，混合後隨機排序 ── */
+  /* ── 開始遊戲：三大主題各先保底抽 1 題，剩下名額從全部題庫隨機補滿 ── */
   function startGame() {
     const all = getActiveQuestions();
     const byCat = { cleaning: [], recycle: [], bio: [] };
     all.forEach(q => { if (byCat[q.cat]) byCat[q.cat].push(q); });
 
-    const picked = [
-      ...shuffle(byCat.cleaning).slice(0, PER_CAT),
-      ...shuffle(byCat.recycle).slice(0, PER_CAT),
-      ...shuffle(byCat.bio).slice(0, PER_CAT),
-    ];
+    // 保底：三大主題各先抽 1 題，確保每次都會出現
+    const guaranteed = ['cleaning', 'recycle', 'bio']
+      .map(cat => shuffle(byCat[cat])[0])
+      .filter(Boolean);
+
+    // 剩下名額從扣掉保底題目的題庫中隨機補滿
+    const pickedSet = new Set(guaranteed);
+    const rest = shuffle(all.filter(q => !pickedSet.has(q)));
+    const fillCount = Math.max(0, TOTAL_Q - guaranteed.length);
+
+    const picked = [...guaranteed, ...rest.slice(0, fillCount)];
 
     state.questions = shuffle(picked);
     state.total     = state.questions.length;
@@ -627,7 +633,7 @@
 
     // 加分
     if (isCorrect) {
-      state.score += 10;
+      state.score += 20;
       updateScore();
     }
 
@@ -655,7 +661,7 @@
 
   /* ── 顯示結果 ── */
   function showResult() {
-    const pct = state.score / (state.total * 10);
+    const pct = state.score / (state.total * 20);
     let emoji, msg, stars;
 
     if      (pct >= 1.0) { emoji = '🏆'; msg = '滿分達人！環保知識超厲害！';       stars = '⭐⭐⭐⭐⭐'; }
