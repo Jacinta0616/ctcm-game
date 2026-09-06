@@ -186,7 +186,7 @@
         <h2 class="start-title">合併出題大挑戰</h2>
         <p class="start-desc">
           三大主題混合出題，一次考驗你的環保知識！<br>
-          共 <strong>5 題</strong>，每題 <strong>20 分</strong>
+          共 <strong>3 題</strong>，滿分 <strong>100 分</strong>
         </p>
         <div class="theme-tags">
           <span class="theme-tag tag-cleaning">🧹 架房清潔</span>
@@ -204,7 +204,7 @@
         <!-- 左欄：進度 + 題目 -->
         <div class="quiz-left">
           <div class="progress-wrap">
-            <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 5 題</div>
+            <div class="progress-label">第 <span id="q-cur">1</span> 題 ／ 共 3 題</div>
             <div class="progress-track">
               <div id="progress-fill" class="progress-fill" style="width:0%"></div>
             </div>
@@ -245,7 +245,7 @@
   <script>
   /* ==========================================
      合併出題大挑戰 — 從架房清潔／資源回收／生物防治
-     三大主題各保底抽 1 題，剩下名額隨機補滿，共 5 題
+     三大主題各抽 1 題，共 3 題，滿分 100 分
   ========================================== */
 
   const TAG_LABEL = { cleaning: '🧹 架房清潔', recycle: '♻️ 資源回收', bio: '🪲 生物防治' };
@@ -513,12 +513,13 @@
     questions: [],
     current:   0,
     score:     0,
-    total:     5,
+    total:     3,
     lock:      false,
   };
 
   const LABELS  = ['A', 'B', 'C', 'D'];
-  const TOTAL_Q = 5;
+  const TOTAL_Q = 3;
+  const POINTS  = [34, 33, 33]; // 依題目順序給分，加總滿分 100
 
   /* ── 工具 ── */
   function shuffle(arr) {
@@ -633,7 +634,7 @@
 
     // 加分
     if (isCorrect) {
-      state.score += 20;
+      state.score += POINTS[state.current] || 0;
       updateScore();
     }
 
@@ -661,7 +662,7 @@
 
   /* ── 顯示結果 ── */
   function showResult() {
-    const pct = state.score / (state.total * 20);
+    const pct = state.score / 100;
     let emoji, msg, stars;
 
     if      (pct >= 1.0) { emoji = '🏆'; msg = '滿分達人！環保知識超厲害！';       stars = '⭐⭐⭐⭐⭐'; }
